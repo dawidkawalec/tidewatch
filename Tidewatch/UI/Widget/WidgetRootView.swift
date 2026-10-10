@@ -33,7 +33,6 @@ struct WidgetRootView: View {
         }
         .environment(\.appearsActive, true)
         .environment(\.controlActiveState, .key)
-        .preferredColorScheme(.dark)
         .ignoresSafeArea()
     }
 }

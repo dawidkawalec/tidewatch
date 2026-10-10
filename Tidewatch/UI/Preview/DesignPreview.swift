@@ -57,6 +57,9 @@ enum DesignPreview {
             NSApp.terminate(nil)
             return
         }
+        if ProcessInfo.processInfo.environment["TIDEWATCH_PREVIEW_APPEARANCE"] == "dark" {
+            NSApp.appearance = NSAppearance(named: .darkAqua)
+        }
         let now = Date()
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("tidewatch-preview-\(UUID().uuidString)", isDirectory: true)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)

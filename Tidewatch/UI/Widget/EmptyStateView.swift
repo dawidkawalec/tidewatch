@@ -21,7 +21,7 @@ struct EmptyStateView: View {
                 Button("Connect to Claude Code") { connect() }
                     .buttonStyle(.plain)
                     .font(GlassFont.button)
-                    .foregroundStyle(GlassColor.textPrimary)
+                    .foregroundStyle(Color.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 7)
                     .background { Capsule().fill(BrandColor.tide.opacity(0.85)) }

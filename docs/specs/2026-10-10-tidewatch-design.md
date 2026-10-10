@@ -149,7 +149,7 @@ Timing (measured in the spike, VS Code extension): `PermissionRequest` fires imm
 
 - `NSPanel`, the same recipe as Captylo's `RecorderPanel`: `[.borderless, .nonactivatingPanel, .fullSizeContentView]`, `level = .floating`, `collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]`, `hidesOnDeactivate = false`, clear background, `canBecomeKey = false`, shown with `orderFrontRegardless()`. Never activates the app.
 - On the screen with the menu bar, glued to its right edge with an 8 pt gap, vertically centered on the visible frame. Follows screen changes (`NSApplication.didChangeScreenParametersNotification`).
-- Capsule of dark widget glass, 36 pt wide. Lamps are 12 pt in diameter with a 26 pt pitch (tuned in the design preview against the mockups).
+- Capsule of native Liquid Glass (`Glass.regular`), 36 pt wide. The glass follows the system appearance (light glass with dark type in light mode, dark glass with light type in dark mode, like Control Center) and carries a soft lift shadow plus a hairline so it stays visible over white documents. Lamps are glass gems: lit core, specular highlight, coloured glow. (Chosen by the owner on 2026-10-10 over the dark smoked MVP glass and a bead variant.) Lamps are 12 pt in diameter with a 26 pt pitch (tuned in the design preview against the mockups).
 - Stable order: by `firstSeen`. The color stands out, the position never jumps.
 - More than 6 sessions: the first 6 lamps and a chevron below them.
 - No sessions: one dim lamp, so it is clear the app runs.

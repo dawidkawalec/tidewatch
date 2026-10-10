@@ -1,7 +1,9 @@
 import SwiftUI
 
-// Dusk Glass tokens, trimmed from Captylo's GlassTokens.swift (<captylo-repo>,
-// docs/design/dusk-glass.md). Views never hard-code radii, opacities, colours or fonts.
+// Glass tokens: the type and radii of Captylo's Dusk Glass (<captylo-repo>,
+// docs/design/dusk-glass.md) on native Liquid Glass. The widget follows the system appearance:
+// light glass with dark type in light mode, dark glass with light type in dark mode, like
+// Control Center. Views never hard-code radii, opacities, colours or fonts.
 
 enum GlassTokens {
     enum Radius {
@@ -14,29 +16,23 @@ enum GlassTokens {
     }
 
     enum Opacity {
-        /// White fill over the material on the macOS 14/15 path.
-        static let fallbackFill: Double = 0.12
-        /// Badge and button fills inside the panel.
+        /// Badge fill inside the panel (scaled by `GlassColor.fill`).
         static let control: Double = 0.14
         /// Hovered row.
         static let rowHover: Double = 0.08
-        static let shadow: Double = 0.28
     }
 
     enum Shadow {
-        static let panelRadius: CGFloat = 30
-        static let panelY: CGFloat = 14
-    }
-
-    /// The widget's glass, tuned against docs/design mockups (dark smoked glass, white type) and
-    /// over white documents, where lighter values turned the glass pale and the type unreadable.
-    enum Widget {
-        /// White wash inside the glass.
-        static let wash: Double = 0.05
-        /// Abyss smoke inside the glass.
-        static let smoke: Double = 0.75
-        /// Black tint of macOS 26 regular glass.
-        static let tint: Double = 0.20
+        /// Soft lift under the glass, so clear glass still reads over a white document.
+        static let liftOpacity: Double = 0.22
+        static let liftRadius: CGFloat = 14
+        static let liftY: CGFloat = 5
+        /// Hairline around the glass: dark in light mode, light in dark mode.
+        static let hairline: Double = 0.08
+        /// Heavier shadow of the macOS 14/15 material path.
+        static let fallbackOpacity: Double = 0.22
+        static let fallbackRadius: CGFloat = 24
+        static let fallbackY: CGFloat = 10
     }
 
     /// `TIDEWATCH_GLASS_FALLBACK=1` draws the macOS 14/15 material path on macOS 26 (to check it).
@@ -44,21 +40,23 @@ enum GlassTokens {
 }
 
 enum GlassColor {
-    static let textPrimary = Color.white.opacity(0.95)
-    static let textSecondary = Color.white.opacity(0.70)
-    static let textTertiary = Color.white.opacity(0.50)
-    static let separator = Color.white.opacity(0.12)
+    /// Adaptive label styles: vibrant on Liquid Glass, dark in light mode, light in dark mode.
+    static let textPrimary = AnyShapeStyle(.primary)
+    static let textSecondary = AnyShapeStyle(.secondary)
+    static let textTertiary = AnyShapeStyle(.tertiary)
+    /// Badge and hovered-row fills inside the panel.
+    static func fill(_ opacity: Double) -> Color {
+        Color.primary.opacity(opacity * 0.55)
+    }
     /// Working lamp (Captylo's success green).
     static let success = Color(hex: 0x4CD68A)
-    /// Needs approval / awaiting review lamp and text (new in Tidewatch, the mockups' orange).
+    /// Needs approval / awaiting review lamp and text (the mockups' orange).
     static let attention = Color(hex: 0xFF9F43)
-    static let idleLamp = Color.white.opacity(0.35)
+    static let idleLamp = Color(hex: 0x9AA3AD)
     /// The VS Code glyph in the rows.
     static let vscode = Color(hex: 0x3BA0F0)
-    /// Reduce Transparency fill.
-    static let solidPanel = Color(hex: 0x1C3A40)
 
-    /// Rim stroke: luminous top edge fading toward the bottom.
+    /// Rim stroke of the macOS 14/15 path: luminous top edge fading toward the bottom.
     static func rim(top: Double = 0.62, bottom: Double = 0.14) -> LinearGradient {
         LinearGradient(
             colors: [Color.white.opacity(top), Color.white.opacity(bottom), Color.white.opacity(bottom * 1.6)],

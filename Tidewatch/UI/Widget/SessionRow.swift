@@ -32,14 +32,14 @@ struct SessionRow: View {
                     .foregroundStyle(GlassColor.textTertiary)
                 Image(systemName: session.state.host == .vscode ? "chevron.left.forwardslash.chevron.right" : "terminal")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(session.state.host == .vscode ? GlassColor.vscode : GlassColor.textSecondary)
+                    .foregroundStyle(session.state.host == .vscode ? AnyShapeStyle(GlassColor.vscode) : GlassColor.textSecondary)
                     .frame(width: 18)
             }
             .padding(.horizontal, 10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background {
                 RoundedRectangle(cornerRadius: GlassTokens.Radius.row, style: .continuous)
-                    .fill(Color.white.opacity(highlighted ? GlassTokens.Opacity.rowHover : 0))
+                    .fill(GlassColor.fill(highlighted ? GlassTokens.Opacity.rowHover : 0))
             }
             .contentShape(Rectangle())
         }

@@ -14,7 +14,8 @@ Taken from Captylo (`<captylo-repo>/docs/coding-standards.md`) and trimmed to wh
 ## SwiftUI / AppKit
 
 - Tokens live in `UI/Glass/GlassTokens.swift` (radii, paddings, opacities, `GlassColor`, `GlassFont` on Manrope + Inter, `GlassMotion`). No ad-hoc hex colors, materials or `glassEffect` in views: use `widgetGlass`.
-- Glass never sits on glass: only the column capsule and the session panel are real glass; rows and badges are translucent fills with a rim.
+- Glass never sits on glass: only the column capsule and the session panel are real glass; rows and badges are translucent fills.
+- Type on glass uses the adaptive styles in `GlassColor` (`.primary`, `.secondary`, `.tertiary`), never a fixed white or black, so it stays readable in light and dark appearance over any background. Check both with `SNAP_APPEARANCE=dark scripts/snap.sh ...`.
 - The widget panel never activates the app: `orderFrontRegardless()`, never `NSApp.activate` or `makeKey`.
 - Springs `response 0.38, dampingFraction 0.85`. Honor `accessibilityReduceMotion` (cross-fades only, no pulse) and `accessibilityReduceTransparency` (solid fills).
 - Durations ("2m", "1h") are computed from timestamps at render time inside `TimelineView`, never from timers that accumulate.

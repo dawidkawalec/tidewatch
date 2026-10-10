@@ -18,9 +18,6 @@ final class WidgetPanel: NSPanel {
         canHide = false
         isOpaque = false
         backgroundColor = .clear
-        // Liquid Glass follows the window's appearance: in light mode over white documents it
-        // turns pale grey and the white type loses contrast. The widget is always dark glass.
-        appearance = NSAppearance(named: .darkAqua)
         hasShadow = false
         animationBehavior = .utilityWindow
         isMovable = false

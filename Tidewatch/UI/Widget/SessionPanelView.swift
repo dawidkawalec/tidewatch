@@ -46,7 +46,7 @@ struct SessionPanelView: View {
                 .foregroundStyle(GlassColor.textPrimary)
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)
-                .background { Capsule().fill(Color.white.opacity(GlassTokens.Opacity.control)) }
+                .background { Capsule().fill(GlassColor.fill(GlassTokens.Opacity.control)) }
                 .overlay { Capsule().strokeBorder(GlassColor.rim(top: 0.32, bottom: 0.06), lineWidth: GlassTokens.Size.rimWidth) }
         }
         .padding(.horizontal, 12)

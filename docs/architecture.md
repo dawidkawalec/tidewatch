@@ -32,7 +32,7 @@ click on a row -> open folder in VS Code -> vscode://anthropic.claude-code/open?
 | Stable helper copy in Application Support | Moving or updating the app never breaks the command path stored in `settings.json` |
 | The app never writes session files | One writer, no lock contention; "acknowledged" lives in `UserDefaults` |
 | Glass code copied from Captylo, not shared as a package | Captylo is a separate public GPLv3 repo; the owner authored it, the copy is trimmed to what the widget uses |
-| Widget panel forced to `darkAqua` and heavier Abyss smoke (0.75) than Captylo | Over white documents light-mode Liquid Glass turned pale and white type lost contrast (seen in the live test) |
+| Native Liquid Glass (`Glass.regular`) with adaptive type, following the system appearance; gem lamps; soft lift shadow and a hairline | The owner picked it (2026-10-10) over the dark smoked MVP glass and a bead variant, compared on photo, light-document and dark-editor backdrops. Fixed white type had lost contrast over white documents; adaptive `.primary`/`.secondary` stays readable on any background |
 | Pointer tracked by a 150 ms poll of `NSEvent.mouseLocation` plus a tracking area | The panel is never key, so SwiftUI `onHover` is unreliable; lamp and row hit tests come from `WidgetMetrics` |
 | Disconnect drops event arrays left empty | For Claude Code an empty hook array equals a missing key; no extra state needed |
 | A played sound is logged at `notice` level | The only way to verify sounds from outside; `info` is not persisted by the unified log |

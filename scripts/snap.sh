@@ -6,6 +6,7 @@
 #
 # SNAP_BACKDROP=<image>   image right behind the widget (default docs/design/backdrops/dusk.jpg)
 # SNAP_SETTLE=<seconds>   wait after the window appears (default 1.5)
+# SNAP_APPEARANCE=dark    run the preview in dark appearance (TIDEWATCH_PREVIEW_APPEARANCE)
 # TIDEWATCH_GLASS_FALLBACK=1 is passed through (macOS 14/15 glass on macOS 26).
 set -euo pipefail
 
@@ -18,7 +19,7 @@ BACKDROP="${SNAP_BACKDROP:-$ROOT/docs/design/backdrops/dusk.jpg}"
 [[ -x "$BIN" ]] || { echo "snap: no binary at $BIN (run make build)" >&2; exit 1; }
 
 log="$(mktemp -t tidewatch-snap)"
-TIDEWATCH_PREVIEW_BACKDROP="$BACKDROP" "$BIN" --design-preview "$1" >"$log" 2>/dev/null &
+TIDEWATCH_PREVIEW_APPEARANCE="${SNAP_APPEARANCE:-}" TIDEWATCH_PREVIEW_BACKDROP="$BACKDROP" "$BIN" --design-preview "$1" >"$log" 2>/dev/null &
 pid=$!
 trap 'kill "$pid" 2>/dev/null || true; wait "$pid" 2>/dev/null || true; rm -f "$log"' EXIT
 

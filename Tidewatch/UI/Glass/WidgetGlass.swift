@@ -1,39 +1,39 @@
 import SwiftUI
 
-/// The widget's glass (column and panel), from Captylo's RecorderGlass + GlassSurface, trimmed.
-/// macOS 26: regular Liquid Glass with a light tint and `glassEffectID`, so the column and the
-/// panel morph inside `GlassContainer`. macOS 14/15: material + white fill + smoke + rim.
-/// Reduce Transparency: solid fill with the same rim.
+/// The widget's glass (column and panel). macOS 26: native Liquid Glass with `glassEffectID`, so
+/// the column and the panel morph inside `GlassContainer`; it refracts what is behind it and
+/// follows the system appearance. A soft lift shadow keeps clear glass visible over white
+/// documents. macOS 14/15: regular material + rim + shadow. Reduce Transparency: solid window
+/// background with the same rim.
 @MainActor
 struct WidgetGlass<S: InsettableShape>: ViewModifier {
     let shape: S
     let id: String
     let namespace: Namespace.ID
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
         if reduceTransparency {
             content
-                .background { shape.fill(GlassColor.solidPanel) }
+                .background { shape.fill(Color(nsColor: .windowBackgroundColor)) }
                 .overlay { rim }
         } else if #available(macOS 26.0, *), !GlassTokens.forcesFallback {
             content
                 .clipShape(shape)
-                .background {
-                    shape.fill(BrandColor.abyss.opacity(GlassTokens.Widget.smoke))
-                        .overlay { shape.fill(Color.white.opacity(GlassTokens.Widget.wash)) }
+                .glassEffect(.regular, in: shape)
+                .glassEffectID(id, in: namespace)
+                .overlay {
+                    shape
+                        .strokeBorder(Color.primary.opacity(GlassTokens.Shadow.hairline), lineWidth: 0.5)
                         .allowsHitTesting(false)
                 }
-                .glassEffect(Glass.regular.tint(Color.black.opacity(GlassTokens.Widget.tint)), in: shape)
-                .glassEffectID(id, in: namespace)
-                .overlay { rim }
+                .shadow(color: .black.opacity(GlassTokens.Shadow.liftOpacity), radius: GlassTokens.Shadow.liftRadius, y: GlassTokens.Shadow.liftY)
         } else {
             content
                 .background {
-                    shape.fill(.ultraThinMaterial)
-                        .overlay { shape.fill(Color.white.opacity(GlassTokens.Opacity.fallbackFill)) }
-                        .overlay { shape.fill(BrandColor.abyss.opacity(GlassTokens.Widget.smoke)) }
-                        .shadow(color: .black.opacity(GlassTokens.Opacity.shadow), radius: GlassTokens.Shadow.panelRadius, y: GlassTokens.Shadow.panelY)
+                    shape.fill(.regularMaterial)
+                        .shadow(color: .black.opacity(GlassTokens.Shadow.fallbackOpacity), radius: GlassTokens.Shadow.fallbackRadius, y: GlassTokens.Shadow.fallbackY)
                 }
                 .overlay { rim }
         }
@@ -41,7 +41,7 @@ struct WidgetGlass<S: InsettableShape>: ViewModifier {
 
     private var rim: some View {
         shape
-            .strokeBorder(GlassColor.rim(top: 0.6, bottom: 0.2), lineWidth: GlassTokens.Size.rimWidth)
+            .strokeBorder(GlassColor.rim(top: colorScheme == .dark ? 0.6 : 0.9, bottom: 0.2), lineWidth: GlassTokens.Size.rimWidth)
             .allowsHitTesting(false)
     }
 }
