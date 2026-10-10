@@ -98,7 +98,7 @@ final class WidgetPanelController {
     private func setExpanded(_ expanded: Bool) {
         guard model.isExpanded != expanded else { return }
         let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-        withAnimation(reduceMotion ? GlassMotion.reduced : GlassMotion.spring) {
+        withAnimation(reduceMotion ? GlassMotion.reduced : GlassMotion.liquid) {
             model.isExpanded = expanded
         }
     }

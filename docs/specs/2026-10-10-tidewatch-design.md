@@ -156,8 +156,8 @@ Timing (measured in the spike, VS Code extension): `PermissionRequest` fires imm
 
 ### 5.2 Session panel (expanded)
 
-- Opens after 280 ms of hover and closes 450 ms after the pointer leaves the column and the panel (Captylo's `RecorderMetrics`). Captylo's spring (`response 0.38, damping 0.85`). Glass morph between the shapes on macOS 26, scale + opacity on 14/15, cross-fade only under Reduce Motion.
-- Sits left of the column, 280 pt wide, 28 pt corner radius, vertically centred on it. No notch: two glass shapes do not join cleanly on macOS 14/15, and the 10 pt gap reads as one widget.
+- Opens after 280 ms of hover and closes 450 ms after the pointer leaves the column and the panel (Captylo's `RecorderMetrics`). iOS-like Liquid Glass motion (spring `response 0.46, damping 0.72`): the panel wells out of the column, merged with it as one drop of glass (`GlassEffectContainer` spacing 12 pt), then springs left and detaches; on close it falls back into the column. Glass is interactive (reacts to the pointer), lamps pop briefly when their status changes, and the capsule grows or shrinks like liquid when sessions come and go. Cross-fade only under Reduce Motion.
+- Sits left of the column, 280 pt wide, 28 pt corner radius, vertically centred on it, 16 pt away (wider than the merge spacing, so at rest it is its own drop). Glass carries a 15 % black tint for legibility (owner's request); the needs-approval text uses a deeper orange on light glass.
 - Header: "AI Agents" (Manrope SemiBold 15) and a count badge.
 - Row (46 pt min height): lamp, project name (Inter 14, white 95 %), status line (Inter 12), time in the current status (`2m`, `1h`, monospaced digits), VS Code glyph (or the terminal glyph for terminal sessions). Hovered row: white 8 % fill. Hovering a lamp in the column highlights its row.
 - Two sessions in the same folder: the second line shows the session title to tell them apart.

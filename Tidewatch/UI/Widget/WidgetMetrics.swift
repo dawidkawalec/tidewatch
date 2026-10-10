@@ -3,7 +3,7 @@ import CoreGraphics
 /// Geometry of the widget canvas in points, origin bottom left (AppKit). The SwiftUI layout and
 /// the hover hit tests both read it, so they always agree.
 struct WidgetMetrics: Equatable, Sendable {
-    static let canvas = CGSize(width: 340, height: 600)
+    static let canvas = CGSize(width: 352, height: 600)
     static let edgeGap: CGFloat = 8
     static let columnWidth: CGFloat = 36
     static let columnPadding: CGFloat = 9
@@ -11,7 +11,8 @@ struct WidgetMetrics: Equatable, Sendable {
     static let lampSize: CGFloat = 12
     static let chevronHeight: CGFloat = 16
     static let maxLamps = 6
-    static let panelGap: CGFloat = 10
+    /// Wider than `GlassTokens.Liquid.mergeSpacing`: at rest the panel is its own drop of glass.
+    static let panelGap: CGFloat = 16
     static let panelWidth: CGFloat = 280
     static let headerHeight: CGFloat = 52
     static let rowHeight: CGFloat = 50

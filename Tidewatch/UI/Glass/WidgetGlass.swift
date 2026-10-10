@@ -21,7 +21,8 @@ struct WidgetGlass<S: InsettableShape>: ViewModifier {
         } else if #available(macOS 26.0, *), !GlassTokens.forcesFallback {
             content
                 .clipShape(shape)
-                .glassEffect(.regular, in: shape)
+                // Interactive: the glass reacts to the pointer like iOS controls.
+                .glassEffect(Glass.regular.tint(Color.black.opacity(GlassTokens.Liquid.dim)).interactive(), in: shape)
                 .glassEffectID(id, in: namespace)
                 .overlay {
                     shape

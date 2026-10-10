@@ -35,6 +35,16 @@ enum GlassTokens {
         static let fallbackY: CGFloat = 10
     }
 
+    /// Liquid Glass of the widget.
+    enum Liquid {
+        /// Black tint over the glass: the owner asked for 10-20 % more darkening for legibility.
+        static let dim: Double = 0.15
+        /// Glass shapes closer than this flow into each other (`GlassEffectContainer`). It is
+        /// smaller than `WidgetMetrics.panelGap`, so the panel merges with the column only while it
+        /// emerges from it, then detaches like a drop.
+        static let mergeSpacing: CGFloat = 12
+    }
+
     /// `TIDEWATCH_GLASS_FALLBACK=1` draws the macOS 14/15 material path on macOS 26 (to check it).
     static let forcesFallback: Bool = ProcessInfo.processInfo.environment["TIDEWATCH_GLASS_FALLBACK"] == "1"
 }
@@ -52,6 +62,12 @@ enum GlassColor {
     static let success = Color(hex: 0x4CD68A)
     /// Needs approval / awaiting review lamp and text (the mockups' orange).
     static let attention = Color(hex: 0xFF9F43)
+    /// Status text in the attention colour: a deeper orange on light glass, so it keeps contrast.
+    static let attentionText = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 1.0, green: 0.62, blue: 0.26, alpha: 1)
+            : NSColor(srgbRed: 0.80, green: 0.40, blue: 0.04, alpha: 1)
+    })
     static let idleLamp = Color(hex: 0x9AA3AD)
     /// The VS Code glyph in the rows.
     static let vscode = Color(hex: 0x3BA0F0)
@@ -90,5 +106,7 @@ enum GlassFont {
 
 enum GlassMotion {
     static var spring: Animation { .spring(response: 0.38, dampingFraction: 0.85) }
+    /// iOS-like Liquid Glass motion: a little overshoot, settles fast.
+    static var liquid: Animation { .spring(response: 0.46, dampingFraction: 0.72) }
     static var reduced: Animation { .easeInOut(duration: 0.18) }
 }

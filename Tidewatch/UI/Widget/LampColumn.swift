@@ -15,6 +15,7 @@ struct LampColumn: View {
                 ForEach(Array(sessions.prefix(WidgetMetrics.maxLamps).enumerated()), id: \.element.id) { index, session in
                     StatusLamp(status: session.status, highlighted: hoveredIndex == index)
                         .frame(height: WidgetMetrics.lampPitch)
+                        .transition(.scale(scale: 0.2).combined(with: .opacity))
                 }
             }
             if metrics.hasOverflow {

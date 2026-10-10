@@ -6,7 +6,7 @@ struct GlassContainer<Content: View>: View {
 
     var body: some View {
         if #available(macOS 26.0, *), !GlassTokens.forcesFallback {
-            GlassEffectContainer(spacing: 2) { content }
+            GlassEffectContainer(spacing: GlassTokens.Liquid.mergeSpacing) { content }
         } else {
             content
         }

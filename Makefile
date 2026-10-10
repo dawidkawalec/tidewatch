@@ -8,7 +8,7 @@ XCODEBUILD := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath 
 # The indented "(in target '" lines are the compile errors the test action lists under "Testing failed:".
 XCPRETTY := grep -E "error:|warning: .*(Tidewatch|TidewatchHook|TidewatchCore)|BUILD (SUCCEEDED|FAILED)|TEST (SUCCEEDED|FAILED)|Testing failed|^[[:space:]]+[^[:space:]].*\(in target '|✘|Test run with" | grep -v '\[Connection\]'
 
-.PHONY: gen build test test-core test-hook release sign install run clean
+.PHONY: gen build test test-core test-hook release sign install run clean dist dist-dry publish
 
 gen:
 	xcodegen generate
@@ -55,6 +55,22 @@ install: release
 	@rm -rf "/Applications/$(APP_NAME)"
 	@ditto "$(HOME)/Downloads/$(APP_NAME)" "/Applications/$(APP_NAME)"
 	@echo "Installed to /Applications/$(APP_NAME)"
+
+# Public build (docs/release.md): Developer ID, notarized and stapled app + DMG in dist/<version>/.
+# Uploads the build to Apple for notarization: owner's go-ahead first.
+dist:
+	@[ -n "$(VERSION)" ] || { echo "usage: make dist VERSION=x.y.z"; exit 2; }
+	scripts/dist.sh $(VERSION)
+
+dist-dry:
+	@[ -n "$(VERSION)" ] || { echo "usage: make dist-dry VERSION=x.y.z"; exit 2; }
+	DRY_RUN=1 scripts/dist.sh $(VERSION)
+
+# GitHub release of dist/<version>/Tidewatch-<version>.dmg on the private repo (owner's go-ahead first).
+publish:
+	@[ -n "$(VERSION)" ] || { echo "usage: make publish VERSION=x.y.z"; exit 2; }
+	@[ -f "dist/$(VERSION)/Tidewatch-$(VERSION).dmg" ] || { echo "run make dist VERSION=$(VERSION) first"; exit 1; }
+	gh release create "v$(VERSION)" "dist/$(VERSION)/Tidewatch-$(VERSION).dmg" --title "Tidewatch $(VERSION)" --notes-file "dist/$(VERSION)/notes.md"
 
 run:
 	@if [ -d "/Applications/$(APP_NAME)" ]; then open "/Applications/$(APP_NAME)"; \

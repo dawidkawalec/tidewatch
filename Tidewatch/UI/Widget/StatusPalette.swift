@@ -14,7 +14,7 @@ enum StatusPalette {
 
     static func text(_ status: SessionStatus) -> AnyShapeStyle {
         switch status {
-        case .needsApproval: return AnyShapeStyle(GlassColor.attention)
+        case .needsApproval: return AnyShapeStyle(GlassColor.attentionText)
         case .idle: return GlassColor.textTertiary
         case .working, .awaitingReview: return GlassColor.textSecondary
         }

@@ -28,7 +28,15 @@ struct StatusLamp: View {
                 }
             }
             .scaleEffect(highlighted ? 1.25 : 1)
-            .animation(reduceMotion ? nil : GlassMotion.spring, value: highlighted)
+            .animation(reduceMotion ? nil : GlassMotion.liquid, value: highlighted)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: status)
+            .keyframeAnimator(initialValue: 1.0, trigger: status) { lamp, scale in
+                lamp.scaleEffect(reduceMotion ? 1 : scale)
+            } keyframes: { _ in
+                // A short pop when the status changes, so a new orange lamp is noticed.
+                SpringKeyframe(1.5, duration: 0.16, spring: .snappy)
+                SpringKeyframe(1.0, duration: 0.45, spring: .bouncy)
+            }
     }
 
     private func gem(_ color: Color, size: CGFloat) -> some View {
