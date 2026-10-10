@@ -17,7 +17,7 @@ Everything stays on your Mac. Tidewatch has no network code: Claude Code hooks w
 
 ## Install
 
-Download `Tidewatch-x.y.z.dmg` from the repo's GitHub Releases, open it and drag Tidewatch to Applications (signed with Developer ID and notarized, so it opens without warnings). Or build it yourself:
+Download Tidewatch from https://kawalec.pl/tidewatch/ (or the repo's GitHub Releases), open the DMG and drag Tidewatch to Applications (signed with Developer ID and notarized, so it opens without warnings). Or build it yourself:
 
 ```bash
 make install            # Release build, signed, copied to /Applications

@@ -1,0 +1,27 @@
+# Reference copy of the Caddy config that serves the download page (the live file is on the server).
+# The snippet goes above the first site that imports it.
+
+(tidewatch_site) {
+    @tidewatch_dmg path /download/*.dmg
+    handle @tidewatch_dmg {
+        uri strip_prefix /download
+        root * /var/www/tidewatch-downloads
+        header Cache-Control "no-cache"
+        header Content-Type "application/x-apple-diskimage"
+        file_server
+    }
+    handle {
+        root * /var/www/tidewatch
+        header X-Content-Type-Options nosniff
+        header /assets/* Cache-Control "public, max-age=604800"
+        header / Cache-Control "no-cache"
+        file_server
+    }
+}
+
+# In each site block that shows the page (kawalec.pl and the craftweb_site snippet):
+#
+#     redir /tidewatch /tidewatch/ permanent
+#     handle_path /tidewatch/* {
+#         import tidewatch_site
+#     }

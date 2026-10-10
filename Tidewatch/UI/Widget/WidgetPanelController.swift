@@ -14,6 +14,7 @@ final class WidgetPanelController {
     private var hoverTask: Task<Void, Never>?
     private var hoverTarget: Bool?
     private var screenObserver: NSObjectProtocol?
+    private var watchesPointer = true
 
     var windowNumber: Int { panel.windowNumber }
     var frame: NSRect { panel.frame }
@@ -26,15 +27,17 @@ final class WidgetPanelController {
         hostingView.onPointer = { [weak self] in self?.evaluatePointer() }
     }
 
-    func show(pinnedExpanded: Bool = false) {
+    /// `watchPointer: false` leaves hover and expansion to the caller (the design preview's demo).
+    func show(pinnedExpanded: Bool = false, watchPointer: Bool = true) {
         model.isExpansionPinned = pinnedExpanded
         model.isExpanded = pinnedExpanded
+        watchesPointer = watchPointer
         reposition()
         panel.orderFrontRegardless()
         screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.reposition() }
         }
-        startPointerWatch()
+        if watchPointer { startPointerWatch() }
         Log.ui.debug("widget shown")
     }
 
@@ -67,6 +70,7 @@ final class WidgetPanelController {
     }
 
     private func evaluatePointer() {
+        guard watchesPointer else { return }
         let metrics = WidgetMetrics(sessionCount: store.sessions.count)
         let point = canvasPoint(NSEvent.mouseLocation)
         let hovered = metrics.lampIndex(at: point) ?? (model.isExpanded ? metrics.rowIndex(at: point) : nil)

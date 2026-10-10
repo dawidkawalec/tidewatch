@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tidewatch - every Claude Code session at a glance, for macOS</title>
+<meta name="description" content="Tidewatch puts a column of glass status lamps on the right edge of your Mac's screen, one per Claude Code session. See which session is working, which needs your approval and which is done, and jump to it in one click.">
+<link rel="canonical" href="https://kawalec.pl/tidewatch/">
+<meta name="theme-color" content="#161616">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tidewatch - every Claude Code session at a glance">
+<meta property="og:description" content="Glass status lamps on the edge of your Mac's screen: green is working, orange needs you, grey is idle. Hover for the list, click to jump to the session.">
+<meta property="og:url" content="https://kawalec.pl/tidewatch/">
+<meta property="og:image" content="https://kawalec.pl/tidewatch/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/img/icon.svg" type="image/svg+xml">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="preload" href="assets/fonts/FunnelDisplay-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css?v=__VERSION__">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Tidewatch","operatingSystem":"macOS 14.4 or later","applicationCategory":"DeveloperApplication","softwareVersion":"__VERSION__","downloadUrl":"https://kawalec.pl/tidewatch/download/Tidewatch.dmg","author":{"@type":"Person","name":"Dawid Kawalec","url":"https://kawalec.pl/"}}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" data-header>
+  <a class="brand" href="./" aria-label="Tidewatch home">
+    <span class="gem gem-working" aria-hidden="true"></span>
+    <span>Tidewatch</span>
+  </a>
+  <nav class="nav" aria-label="Sections">
+    <a href="#how">How it works</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#install">Install</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="btn btn-light btn-sm" href="download/Tidewatch.dmg">
+    <span>Download</span>
+    <span class="btn-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v13m0 0-5-5m5 5 5-5"/></svg></span>
+  </a>
+</header>
+
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero-head">
+      <p class="tag" data-reveal><span class="tag-dot" aria-hidden="true"></span>Own product</p>
+      <div class="hero-copy">
+        <p class="kicker" data-reveal>macOS app · Claude Code · Developer tool</p>
+        <h1 id="hero-title" data-reveal style="--d:.08s">Every Claude Code session, one glance away.</h1>
+        <p class="lead" data-reveal style="--d:.16s">A slim column of glass lamps on the right edge of your screen, one per session. Green is working, orange needs you, grey is resting. Hover for the list, click to land in the right VS Code window.</p>
+        <dl class="meta" data-reveal style="--d:.24s">
+          <div><dt>Category</dt><dd>Developer tool</dd></div>
+          <div><dt>Platform</dt><dd>macOS 14.4+, Apple silicon</dd></div>
+          <div><dt>Version</dt><dd>__VERSION__ · __DMG_SIZE__</dd></div>
+          <div><dt>Made by</dt><dd>Dawid Kawalec</dd></div>
+        </dl>
+        <div class="cta-row" data-reveal style="--d:.32s">
+          <a class="btn btn-light" href="download/Tidewatch.dmg">
+            <span>Download for Mac</span>
+            <span class="btn-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v13m0 0-5-5m5 5 5-5"/></svg></span>
+          </a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-reveal data-stage>
+      <ol class="beats" aria-label="What happens in the video">
+        <li data-at="0.9"><span class="gem gem-working" aria-hidden="true"></span>A new session starts and gets its lamp</li>
+        <li data-at="2.3"><span class="gem gem-attention" aria-hidden="true"></span>Zorko needs approval for <code>npm install</code></li>
+        <li data-at="3.7"><span class="gem gem-idle" aria-hidden="true"></span>Hover the column: the list wells out</li>
+        <li data-at="6.8"><span class="gem gem-attention" aria-hidden="true"></span>Captylo finished its turn, ready for review</li>
+        <li data-at="8.3"><span class="gem gem-working" aria-hidden="true"></span>Back to a quiet column on the edge</li>
+      </ol>
+      <div class="screen">
+        <video data-loop data-beats muted playsinline loop preload="auto" poster="assets/video/demo-dusk.webp" width="352" height="600"
+               aria-label="Tidewatch on a blurred desktop: a lamp appears, turns orange, the session list opens and closes again.">
+          <source src="assets/video/demo-dusk.mp4" type="video/mp4">
+        </video>
+      </div>
+      <p class="stage-note">Recorded from the app, no mockups.</p>
+    </div>
+  </section>
+
+  <section class="section glance" aria-labelledby="glance-title">
+    <div class="wrap">
+      <div class="split">
+        <p class="label" data-reveal>At a glance</p>
+        <h2 id="glance-title" class="statement" data-reveal style="--d:.08s">A status light for every Claude Code session, glued to the edge of your screen. No switching tabs to check who is waiting.</h2>
+      </div>
+      <ul class="stats">
+        <li class="card stat" data-reveal><p class="num">4<span>states</span></p><p>Working, needs you, ready for review and idle. Colors, not text.</p></li>
+        <li class="card stat" data-reveal style="--d:.08s"><p class="num">1<span>click</span></p><p>From the lamp to the right VS Code window and its Claude tab.</p></li>
+        <li class="card stat" data-reveal style="--d:.16s"><p class="num">0<span>bytes sent</span></p><p>No network code, no account, no analytics. It all stays on your Mac.</p></li>
+        <li class="card stat" data-reveal style="--d:.24s"><p class="num">2<span>sounds</span></p><p>"Glass" when a session needs you, "Tink" when it finishes a turn.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="states-title">
+    <div class="wrap">
+      <div class="split">
+        <p class="label" data-reveal>The lamps</p>
+        <h2 id="states-title" class="statement" data-reveal style="--d:.08s">Four colors, nothing to read.</h2>
+      </div>
+      <ul class="states">
+        <li class="card state" data-reveal>
+          <span class="gem gem-working gem-lg" aria-hidden="true"></span>
+          <h3>Working</h3>
+          <p>Claude is coding, running tests or researching. The lamp breathes softly while it works.</p>
+        </li>
+        <li class="card state state-attention" data-reveal style="--d:.08s">
+          <span class="gem gem-attention gem-lg" aria-hidden="true"></span>
+          <h3>Needs you</h3>
+          <p>A tool call waits for your approval, or Claude asked a question. The list shows which command.</p>
+        </li>
+        <li class="card state state-attention" data-reveal style="--d:.16s">
+          <span class="gem gem-attention gem-lg" aria-hidden="true"></span>
+          <h3>Ready for review</h3>
+          <p>Claude finished its turn. Read the result, reply or move on, and the lamp settles.</p>
+        </li>
+        <li class="card state state-idle" data-reveal style="--d:.24s">
+          <span class="gem gem-idle gem-lg" aria-hidden="true"></span>
+          <h3>Idle</h3>
+          <p>The session is open and waiting for your next prompt. Closed sessions disappear by themselves.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="how" aria-labelledby="how-title">
+    <div class="wrap how">
+      <div>
+        <p class="label" data-reveal>How it works</p>
+        <h2 id="how-title" class="statement" data-reveal style="--d:.08s">Out of the way until you need it.</h2>
+        <ol class="how-list">
+          <li data-reveal><span class="step">01</span><div><h3>Glued to the edge</h3><p>The column floats on the right edge above every window and never takes focus, so typing in your editor is never interrupted.</p></div></li>
+          <li data-reveal style="--d:.06s"><span class="step">02</span><div><h3>Hover for the list</h3><p>The panel wells out of the column like a drop of glass: project, what Claude is doing and how long it has been in that state.</p></div></li>
+          <li data-reveal style="--d:.12s"><span class="step">03</span><div><h3>Click to jump</h3><p>The right VS Code window comes to the front with that session's Claude tab open. Terminal sessions bring their terminal forward.</p></div></li>
+          <li data-reveal style="--d:.18s"><span class="step">04</span><div><h3>Hear it, too</h3><p>A soft sound when a session needs your approval or finishes a turn, so you can keep working in another window.</p></div></li>
+        </ol>
+      </div>
+      <figure class="how-media" data-reveal>
+        <div class="seg" role="group" aria-label="Appearance">
+          <button type="button" aria-pressed="true" data-theme-video="dark">Dark</button>
+          <button type="button" aria-pressed="false" data-theme-video="light">Light</button>
+        </div>
+        <div class="screen screen-sm">
+          <video data-loop data-switch muted playsinline loop preload="metadata" poster="assets/video/demo-dark.webp" width="352" height="600"
+                 aria-label="The same cycle over a code editor, in dark or light mode.">
+            <source src="assets/video/demo-dark.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption>Native Liquid Glass on macOS 26 follows light and dark mode, like Control Center.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="privacy" aria-labelledby="privacy-title">
+    <div class="wrap">
+      <div class="split">
+        <p class="label" data-reveal>Privacy</p>
+        <h2 id="privacy-title" class="statement" data-reveal style="--d:.08s">Everything stays on your Mac.</h2>
+      </div>
+      <ul class="facts">
+        <li class="card fact" data-reveal><h3>No network code</h3><p>Tidewatch never connects to the internet. No account, no analytics, no telemetry.</p></li>
+        <li class="card fact" data-reveal style="--d:.08s"><h3>Built on Claude Code's own hooks</h3><p>A tiny helper writes one small status file per session: project folder, status and a one-line preview of the tool call waiting for you. No prompts, no code, no transcripts.</p></li>
+        <li class="card fact" data-reveal><h3>Connect and disconnect in one click</h3><p>Tidewatch adds only its own entries to <code>~/.claude/settings.json</code>, backs the file up first and removes exactly those entries when you disconnect.</p></li>
+        <li class="card fact" data-reveal style="--d:.08s"><h3>Signed and notarized</h3><p>Built with an Apple Developer ID and checked by Apple's notary service, so macOS opens it without warnings.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="install" aria-labelledby="install-title">
+    <div class="wrap install">
+      <div>
+        <p class="label" data-reveal>Install</p>
+        <h2 id="install-title" class="statement" data-reveal style="--d:.08s">Up and running in a minute.</h2>
+        <ol class="how-list">
+          <li data-reveal><span class="step">01</span><div><h3>Download</h3><p>Open the DMG and drag Tidewatch to your Applications folder.</p></div></li>
+          <li data-reveal style="--d:.06s"><span class="step">02</span><div><h3>Connect</h3><p>Open it and choose <em>Connect to Claude Code</em> from the lamp icon in the menu bar.</p></div></li>
+          <li data-reveal style="--d:.12s"><span class="step">03</span><div><h3>Work as usual</h3><p>Start or resume a session. The first time you click one, VS Code asks to open the Claude link: tick "Do not ask me again".</p></div></li>
+        </ol>
+      </div>
+      <aside class="card specs" data-reveal aria-label="Requirements">
+        <h3>Requirements</h3>
+        <ul>
+          <li>macOS 14.4 or later, Apple silicon</li>
+          <li>Claude Code: the VS Code extension or the CLI</li>
+          <li>VS Code for jumping straight into a session</li>
+          <li>Liquid Glass on macOS 26, frosted glass on 14 and 15</li>
+        </ul>
+        <a class="btn btn-light btn-wide" href="download/Tidewatch.dmg">
+          <span>Download Tidewatch __VERSION__</span>
+          <span class="btn-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v13m0 0-5-5m5 5 5-5"/></svg></span>
+        </a>
+        <p class="sha-label">SHA-256 of Tidewatch-__VERSION__.dmg</p>
+        <div class="sha">
+          <code data-sha>__DMG_SHA256__</code>
+          <button class="sha-copy" type="button" data-copy aria-label="Copy the SHA-256 checksum">Copy</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="split">
+        <p class="label" data-reveal>FAQ</p>
+        <div class="faq" data-reveal style="--d:.08s">
+          <h2 id="faq-title" class="visually-hidden">Questions</h2>
+          <details>
+            <summary>Is Tidewatch made by Anthropic?</summary>
+            <p>No. It is an independent tool by Dawid Kawalec. Claude and Claude Code are trademarks of Anthropic.</p>
+          </details>
+          <details>
+            <summary>Does it slow Claude Code down?</summary>
+            <p>No. The helper finishes in milliseconds, never blocks and never changes what Claude does. If anything goes wrong it simply exits.</p>
+          </details>
+          <details>
+            <summary>A session does not show up. Why?</summary>
+            <p>Claude Code runs hooks only in folders you trust. Open the folder in Claude Code once and accept the trust prompt. If nothing shows up at all, choose <em>Connect to Claude Code</em> in the menu bar again.</p>
+          </details>
+          <details>
+            <summary>Does it work with the Claude Code CLI?</summary>
+            <p>Yes. CLI sessions get their lamp too. A click brings Terminal, iTerm, Ghostty or Warp to the front, or opens the folder in VS Code when the session runs in VS Code's terminal.</p>
+          </details>
+          <details>
+            <summary>What about Intel Macs?</summary>
+            <p>Tidewatch is built for Apple silicon only for now.</p>
+          </details>
+          <details>
+            <summary>How do I remove it?</summary>
+            <p>Choose <em>Disconnect</em> in the menu bar, quit Tidewatch, then delete the app and the folder <code>~/Library/Application Support/Tidewatch</code>. Your Claude Code settings are back to how they were.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="outro" aria-labelledby="outro-title">
+    <div class="wrap outro-inner" data-reveal>
+      <div class="outro-lamps" aria-hidden="true">
+        <span class="gem gem-working"></span><span class="gem gem-attention"></span><span class="gem gem-working"></span><span class="gem gem-idle"></span><span class="gem gem-working"></span>
+      </div>
+      <h2 id="outro-title">Keep an eye on the tide.</h2>
+      <a class="btn btn-light" href="download/Tidewatch.dmg">
+        <span>Download for Mac</span>
+        <span class="btn-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v13m0 0-5-5m5 5 5-5"/></svg></span>
+      </a>
+      <p class="outro-meta">Version __VERSION__ · macOS 14.4+ · Apple silicon · Signed and notarized</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <p><b>Tidewatch</b> by <a href="https://kawalec.pl/">Dawid Kawalec</a> · <a href="https://craftweb.pl/">CraftWeb</a> · Also by me: <a href="https://captylo.com/">Captylo</a></p>
+    <p class="footer-note">Not affiliated with Anthropic. This page sets no cookies and runs no analytics.</p>
+  </div>
+</footer>
+
+<script src="assets/site.js?v=__VERSION__" defer></script>
+</body>
+</html>

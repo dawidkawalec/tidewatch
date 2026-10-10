@@ -21,8 +21,10 @@ make test     # unit tests (core package + app)
 make release  # Release build to ~/Downloads, signed with "Captylo Dev" (or ad-hoc)
 make install  # release + copy to /Applications
 make dist VERSION=x.y.z      # Developer ID, notarized + stapled app and DMG in dist/ (owner's go-ahead)
-make publish VERSION=x.y.z   # GitHub release with the DMG (owner's go-ahead)
+make publish VERSION=x.y.z   # download page + DMG on the VPS, then GitHub release (owner's go-ahead)
+make site VERSION=x.y.z      # local preview of the download page (site/) at localhost:8787/tidewatch/
 scripts/snap.sh <target> <out.png>   # screenshot a design preview target (fake sessions)
+scripts/record-demo.sh <out>         # record the looping widget-demo video for the page
 ```
 
 ## Docs
@@ -30,7 +32,7 @@ scripts/snap.sh <target> <out.png>   # screenshot a design preview target (fake 
 - [docs/specs/2026-10-10-tidewatch-design.md](docs/specs/2026-10-10-tidewatch-design.md) - MVP spec: statuses, event mapping, UI, hook install, spike
 - [docs/architecture.md](docs/architecture.md) - modules, data flow, decisions
 - [docs/coding-standards.md](docs/coding-standards.md) - Swift 6 rules, UI tokens, tests, git
-- [docs/release.md](docs/release.md) - signed, notarized DMG and GitHub release
+- [docs/release.md](docs/release.md) - signed, notarized DMG, download page (kawalec.pl/tidewatch, craftweb.pl/tidewatch), GitHub release
 
 ## Critical Rules
 

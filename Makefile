@@ -8,7 +8,7 @@ XCODEBUILD := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath 
 # The indented "(in target '" lines are the compile errors the test action lists under "Testing failed:".
 XCPRETTY := grep -E "error:|warning: .*(Tidewatch|TidewatchHook|TidewatchCore)|BUILD (SUCCEEDED|FAILED)|TEST (SUCCEEDED|FAILED)|Testing failed|^[[:space:]]+[^[:space:]].*\(in target '|✘|Test run with" | grep -v '\[Connection\]'
 
-.PHONY: gen build test test-core test-hook release sign install run clean dist dist-dry publish
+.PHONY: gen build test test-core test-hook release sign install run clean dist dist-dry publish site deploy-site
 
 gen:
 	xcodegen generate
@@ -66,10 +66,22 @@ dist-dry:
 	@[ -n "$(VERSION)" ] || { echo "usage: make dist-dry VERSION=x.y.z"; exit 2; }
 	DRY_RUN=1 scripts/dist.sh $(VERSION)
 
-# GitHub release of dist/<version>/Tidewatch-<version>.dmg on the private repo (owner's go-ahead first).
+# Download page (site/): local preview, and the live deploy to kawalec.pl/tidewatch and craftweb.pl/tidewatch.
+site:
+	@[ -n "$(VERSION)" ] || { echo "usage: make site VERSION=x.y.z"; exit 2; }
+	scripts/site.sh preview $(VERSION)
+
+# Uploads the DMG and the page to the server (deploy/local.env): owner's go-ahead first.
+deploy-site:
+	@[ -n "$(VERSION)" ] || { echo "usage: make deploy-site VERSION=x.y.z"; exit 2; }
+	scripts/site.sh deploy $(VERSION)
+
+# Public download page + GitHub release of dist/<version>/Tidewatch-<version>.dmg on the private repo
+# (owner's go-ahead first).
 publish:
 	@[ -n "$(VERSION)" ] || { echo "usage: make publish VERSION=x.y.z"; exit 2; }
 	@[ -f "dist/$(VERSION)/Tidewatch-$(VERSION).dmg" ] || { echo "run make dist VERSION=$(VERSION) first"; exit 1; }
+	scripts/site.sh deploy $(VERSION)
 	gh release create "v$(VERSION)" "dist/$(VERSION)/Tidewatch-$(VERSION).dmg" --title "Tidewatch $(VERSION)" --notes-file "dist/$(VERSION)/notes.md"
 
 run:

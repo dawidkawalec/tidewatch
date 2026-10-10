@@ -12,6 +12,8 @@ enum DesignPreview {
         case empty = "widget-empty"
         case overflow = "widget-overflow"
         case disconnected = "widget-disconnected"
+        /// The scripted, looping cycle in DesignPreviewDemo.swift.
+        case demo = "widget-demo"
     }
 
     private static var retained: [AnyObject] = []
@@ -40,6 +42,8 @@ enum DesignPreview {
             return five
         case .empty, .disconnected:
             return []
+        case .demo:
+            return Demo.sessions(for: Demo.initial, now: now)
         case .overflow:
             return five + [
                 make(6, "Snapfeed", .awaitingReview, minutes: 1),
@@ -57,8 +61,10 @@ enum DesignPreview {
             NSApp.terminate(nil)
             return
         }
-        if ProcessInfo.processInfo.environment["TIDEWATCH_PREVIEW_APPEARANCE"] == "dark" {
-            NSApp.appearance = NSAppearance(named: .darkAqua)
+        switch ProcessInfo.processInfo.environment["TIDEWATCH_PREVIEW_APPEARANCE"] {
+        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+        case "light": NSApp.appearance = NSAppearance(named: .aqua)
+        default: break
         }
         let now = Date()
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("tidewatch-preview-\(UUID().uuidString)", isDirectory: true)
@@ -70,7 +76,8 @@ enum DesignPreview {
         let suite = "tidewatch-preview"
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
-        let store = SessionStore(fileStore: files, acknowledged: AcknowledgedStore(defaults: defaults), isAlive: { _ in true }, clock: { now })
+        let isDemo = target == .demo
+        let store = SessionStore(fileStore: files, acknowledged: AcknowledgedStore(defaults: defaults), isAlive: { _ in true }, clock: { isDemo ? Date() : now })
         store.reload()
         let settings = AppSettings(defaults: defaults)
         settings.hooksConnected = target != .disconnected
@@ -89,7 +96,11 @@ enum DesignPreview {
         }
 
         let controller = WidgetPanelController(store: store, settings: settings, actions: .preview)
-        controller.show(pinnedExpanded: target != .collapsed)
+        // The demo drives expansion and hover itself; the pointer must not take them over.
+        controller.show(pinnedExpanded: target != .collapsed, watchPointer: !isDemo)
+        if isDemo {
+            Demo.play(store: store, files: files, model: controller.model)
+        }
         retained.append(store)
         retained.append(controller)
         retained.append(settings)
