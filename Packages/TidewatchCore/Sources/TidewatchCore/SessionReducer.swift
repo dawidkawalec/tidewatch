@@ -52,6 +52,12 @@ public enum SessionReducer {
             state.title = title
         }
 
+        // A fresh start ("startup", "clear") has nothing to watch yet; a resumed or compacted session
+        // and every other event mean someone works in it.
+        if kind != .sessionStart || (event.source != nil && event.source != "startup" && event.source != "clear") {
+            state.startedConversation = true
+        }
+
         switch kind {
         case .sessionStart:
             // A new session starts idle (from init); a resumed or compacted one keeps its status.

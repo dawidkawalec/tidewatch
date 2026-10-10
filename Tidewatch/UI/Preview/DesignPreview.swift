@@ -21,6 +21,7 @@ enum DesignPreview {
     static func sessions(for target: Target, now: Date) -> [SessionState] {
         func make(_ order: Int, _ name: String, _ status: SessionStatus, _ activity: SessionActivity = .working, minutes: Double, tool: String? = nil, detail: String? = nil) -> SessionState {
             var state = SessionState(sessionId: "preview-\(order)", cwd: "/Users/demo/\(name)", host: .vscode, terminalApp: nil, pid: nil, now: now)
+            state.startedConversation = true
             state.status = status
             state.activity = activity
             state.tool = tool

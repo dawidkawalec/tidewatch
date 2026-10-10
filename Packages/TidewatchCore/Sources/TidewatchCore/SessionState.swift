@@ -29,8 +29,13 @@ public struct SessionState: Codable, Sendable, Equatable, Identifiable {
     public var firstSeen: Date
     /// Changes on every event.
     public var lastEvent: Date
+    /// False from a fresh SessionStart until the first prompt or tool call: the VS Code extension
+    /// starts spare processes that never get one. nil (files from before 0.3.0) counts as true.
+    public var startedConversation: Bool?
 
     public var id: String { sessionId }
+
+    public var hasConversation: Bool { startedConversation ?? true }
 
     /// The project folder's name ("captylo-app"), the row title.
     public var project: String {
@@ -56,5 +61,6 @@ public struct SessionState: Codable, Sendable, Equatable, Identifiable {
         statusSince = now
         firstSeen = now
         lastEvent = now
+        startedConversation = false
     }
 }

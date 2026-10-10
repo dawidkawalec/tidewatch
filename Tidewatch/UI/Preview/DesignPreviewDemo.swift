@@ -86,6 +86,7 @@ extension DesignPreview {
         static func sessions(for scene: Scene, now: Date) -> [SessionState] {
             scene.lamps.map { lamp in
                 var state = SessionState(sessionId: "demo-\(lamp.order)", cwd: "/Users/demo/\(lamp.name)", host: .vscode, terminalApp: nil, pid: nil, now: now)
+                state.startedConversation = true
                 state.status = lamp.status
                 state.activity = lamp.activity
                 state.tool = lamp.tool

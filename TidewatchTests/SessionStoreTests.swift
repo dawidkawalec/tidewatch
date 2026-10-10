@@ -35,8 +35,9 @@ struct SessionStoreTests {
         )
     }
 
-    private func put(_ id: String, _ status: SessionStatus, cwd: String = "/Users/demo/app", pid: Int32? = nil, firstSeen: TimeInterval = 0, lastEvent: TimeInterval = 0) throws {
+    private func put(_ id: String, _ status: SessionStatus, cwd: String = "/Users/demo/app", pid: Int32? = nil, firstSeen: TimeInterval = 0, lastEvent: TimeInterval = 0, conversation: Bool = true) throws {
         var state = SessionState(sessionId: id, cwd: cwd, host: .vscode, terminalApp: nil, pid: pid, now: clock.now.addingTimeInterval(firstSeen))
+        state.startedConversation = conversation
         state.status = status
         state.statusSince = clock.now.addingTimeInterval(lastEvent)
         state.lastEvent = clock.now.addingTimeInterval(lastEvent)
@@ -51,6 +52,18 @@ struct SessionStoreTests {
         #expect(store.sessions.map(\.id) == ["a", "b"])
         #expect(store.sessions.map(\.name) == ["app", "site"])
         #expect(store.sessions.map(\.status) == [.needsApproval, .working])
+    }
+
+    /// A spare VS Code process (no prompt yet) and a Claude Code helper inside ~/.claude get no
+    /// lamp. Their files stay: the spare one shows up as soon as someone types in it.
+    @Test func hidesSessionsWithoutAConversationOrInsideClaudesFolder() throws {
+        try put("real", .working)
+        try put("spare", .idle, conversation: false)
+        try put("helper", .idle, cwd: "/Users/demo/.claude/projects/-Users-demo-app")
+        let store = SessionStore(fileStore: files, acknowledged: AcknowledgedStore(defaults: defaults), isAlive: { _ in true }, clock: { [clock] in clock.now }, home: "/Users/demo")
+        store.reload()
+        #expect(store.sessions.map(\.id) == ["real"])
+        #expect(FileManager.default.fileExists(atPath: files.fileURL(for: "spare").path))
     }
 
     @Test func dropsDeadProcessesAndDeletesTheirFiles() throws {

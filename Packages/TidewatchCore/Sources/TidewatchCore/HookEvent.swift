@@ -30,6 +30,8 @@ public struct HookEvent: Sendable, Equatable {
     public var message: String?
     public var sessionTitle: String?
     public var runningBackgroundTasks: Int
+    /// SessionStart only: "startup", "resume", "clear" or "compact".
+    public var source: String?
 
     public init(
         kind: Kind,
@@ -42,7 +44,8 @@ public struct HookEvent: Sendable, Equatable {
         notificationType: String? = nil,
         message: String? = nil,
         sessionTitle: String? = nil,
-        runningBackgroundTasks: Int = 0
+        runningBackgroundTasks: Int = 0,
+        source: String? = nil
     ) {
         self.kind = kind
         rawName = kind.rawValue
@@ -56,6 +59,7 @@ public struct HookEvent: Sendable, Equatable {
         self.message = message
         self.sessionTitle = sessionTitle
         self.runningBackgroundTasks = runningBackgroundTasks
+        self.source = source
     }
 
     public static func decode(_ data: Data) throws -> HookEvent {
@@ -77,6 +81,7 @@ extension HookEvent {
             case message
             case sessionTitle = "session_title"
             case backgroundTasks = "background_tasks"
+            case source
         }
 
         private enum ToolKeys: String, CodingKey {
@@ -109,7 +114,8 @@ extension HookEvent {
                 notificationType: try? container.decodeIfPresent(String.self, forKey: .notificationType),
                 message: try? container.decodeIfPresent(String.self, forKey: .message),
                 sessionTitle: try? container.decodeIfPresent(String.self, forKey: .sessionTitle),
-                runningBackgroundTasks: tasks.filter { $0.status == "running" }.count
+                runningBackgroundTasks: tasks.filter { $0.status == "running" }.count,
+                source: try? container.decodeIfPresent(String.self, forKey: .source)
             )
             event.kind = Kind(rawValue: name)
             event.rawName = name

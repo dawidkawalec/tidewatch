@@ -31,6 +31,8 @@ final class SessionStore {
     @ObservationIgnored private let acknowledged: AcknowledgedStore
     @ObservationIgnored private let isAlive: @Sendable (Int32) -> Bool
     @ObservationIgnored private let clock: @Sendable () -> Date
+    /// The user's home folder, for `DisplayRules.isShown` (Claude Code's own `~/.claude`).
+    @ObservationIgnored private let home: String
     @ObservationIgnored private var watcher: SessionFolderWatcher?
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private var lastStatuses: [String: SessionStatus] = [:]
@@ -40,12 +42,14 @@ final class SessionStore {
         fileStore: SessionFileStore,
         acknowledged: AcknowledgedStore,
         isAlive: @escaping @Sendable (Int32) -> Bool = ProcessLiveness.isAlive,
-        clock: @escaping @Sendable () -> Date = { Date() }
+        clock: @escaping @Sendable () -> Date = { Date() },
+        home: String = NSHomeDirectory()
     ) {
         self.fileStore = fileStore
         self.acknowledged = acknowledged
         self.isAlive = isAlive
         self.clock = clock
+        self.home = home
     }
 
     func start() {
@@ -75,6 +79,8 @@ final class SessionStore {
                 Log.sessions.info("dropped an ended session")
                 continue
             }
+            // Spare processes and Claude Code's helpers keep their files but get no lamp.
+            guard DisplayRules.isShown(state, home: home) else { continue }
             live.append(state)
         }
 

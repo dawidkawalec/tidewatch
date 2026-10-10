@@ -28,6 +28,14 @@ public enum DisplayRules {
         now.timeIntervalSince(state.lastEvent) > abandonedAfter
     }
 
+    /// Whether a session gets a lamp: someone works in it (not a spare process the VS Code extension
+    /// started) and it runs in a project, not inside Claude Code's own `~/.claude` folder.
+    public static func isShown(_ state: SessionState, home: String) -> Bool {
+        guard state.hasConversation else { return false }
+        let claudeFolder = (home.hasSuffix("/") ? String(home.dropLast()) : home) + "/.claude"
+        return state.cwd != claudeFolder && !state.cwd.hasPrefix(claudeFolder + "/")
+    }
+
     /// Stable order: lamps never jump when a status changes.
     public static func ordered(_ sessions: [SessionState]) -> [SessionState] {
         sessions.sorted { ($0.firstSeen, $0.sessionId) < ($1.firstSeen, $1.sessionId) }
