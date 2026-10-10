@@ -20,6 +20,10 @@ struct MenuBarContent: View {
         Divider()
         Text("Tip: the first click asks VS Code to allow the Claude link once. Tick \"Do not ask me again\".")
         Divider()
+        Text(state.updater.versionLine)
+        Button("Check for Updates…") { state.updater.checkNow() }
+            .disabled(!state.updater.isConfigured || !state.updater.canCheckNow)
+        Divider()
         Button("Quit Tidewatch") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
     }

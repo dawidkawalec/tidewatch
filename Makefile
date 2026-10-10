@@ -22,6 +22,7 @@ test-core:
 test: gen test-core
 	set -o pipefail; $(XCODEBUILD) -configuration Debug CODE_SIGN_IDENTITY="-" test 2>&1 | $(XCPRETTY)
 	@if [ -x scripts/test-hook.sh ]; then scripts/test-hook.sh; fi
+	python3 -m unittest discover -s scripts -p 'test_*.py' 2>&1 | tail -n 1
 
 # Stable local signing identity shared with Captylo (scripts/setup-signing.sh in Captylo).
 # Without it builds are signed ad-hoc. The signing keychain joins the search list only for the
@@ -38,16 +39,23 @@ release: gen
 	@$(MAKE) --no-print-directory sign APP_PATH="$(HOME)/Downloads/$(APP_NAME)"
 	@echo "Release build copied to ~/Downloads/$(APP_NAME)"
 
+# Local builds only: "Captylo Dev" has no Team ID, so library validation would refuse Sparkle
+# (scripts/sign-app.sh). The dev entitlements turn it off; public builds keep it (scripts/dist.sh).
+DEV_ENTITLEMENTS := $(DERIVED)/TidewatchDev.entitlements
+
 sign:
+	@mkdir -p "$(DERIVED)"
+	@cp "$(CURDIR)/Tidewatch/Tidewatch.entitlements" "$(DEV_ENTITLEMENTS)"
+	@/usr/libexec/PlistBuddy -c "Add :com.apple.security.cs.disable-library-validation bool true" "$(DEV_ENTITLEMENTS)"
 	@if security find-identity -p codesigning "$(SIGN_KEYCHAIN)" 2>/dev/null | grep -q '"$(SIGN_NAME)"'; then \
 		security unlock-keychain -p "$$(cat "$(SIGN_PASSWORD_FILE)")" "$(SIGN_KEYCHAIN)"; \
 		ORIGINAL="$$(security list-keychains -d user | tr -d '"' | xargs)"; \
 		trap 'security list-keychains -d user -s $$ORIGINAL' EXIT; \
 		security list-keychains -d user -s $$ORIGINAL "$(SIGN_KEYCHAIN)"; \
-		scripts/sign-app.sh "$(APP_PATH)" "$(SIGN_NAME)" "$(SIGN_KEYCHAIN)" && echo "Signed with $(SIGN_NAME)"; \
+		SIGN_ENTITLEMENTS="$(DEV_ENTITLEMENTS)" scripts/sign-app.sh "$(APP_PATH)" "$(SIGN_NAME)" "$(SIGN_KEYCHAIN)" && echo "Signed with $(SIGN_NAME)"; \
 	else \
 		echo "No '$(SIGN_NAME)' identity; signing ad-hoc"; \
-		scripts/sign-app.sh "$(APP_PATH)" -; \
+		SIGN_ENTITLEMENTS="$(DEV_ENTITLEMENTS)" scripts/sign-app.sh "$(APP_PATH)" -; \
 	fi
 
 install: release

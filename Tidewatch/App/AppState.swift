@@ -9,6 +9,8 @@ final class AppState {
     let mode: LaunchMode
     let settings: AppSettings
     let store: SessionStore
+    /// Sparkle; live only for a normal launch (never the design preview or the test host).
+    let updater: AppUpdater
     private(set) var hookError: String?
     private(set) var launchAtLogin = LaunchAtLogin.isEnabled
     @ObservationIgnored private var widget: WidgetPanelController?
@@ -20,6 +22,11 @@ final class AppState {
         self.mode = mode
         settings = AppSettings(defaults: defaults)
         store = SessionStore(fileStore: SessionFileStore(directory: DataPaths.sessions()), acknowledged: AcknowledgedStore(defaults: defaults))
+        if case .normal = mode {
+            updater = AppUpdater(enabled: true)
+        } else {
+            updater = AppUpdater(enabled: false)
+        }
     }
 
     func start() {
@@ -41,6 +48,7 @@ final class AppState {
             let controller = WidgetPanelController(store: store, settings: settings, actions: actions)
             controller.show()
             widget = controller
+            updater.start()
         }
     }
 

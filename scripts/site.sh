@@ -52,9 +52,14 @@ deploy() {
     source "$env"
     : "${PUBLISH_HOST:?}" "${PUBLISH_SITE_ROOT:?}" "${PUBLISH_DOWNLOADS:?}" "${PUBLISH_URLS:?}"
     build
-    local name bytes
+    local name bytes appcast="$ROOT/site/updates/appcast.xml" app_build
     name="$(basename "$DMG")"
     bytes="$(stat -f %z "$DMG")"
+    # Sparkle: installed copies download what the appcast says, so it must describe this DMG.
+    if [[ -f "$appcast" ]]; then
+        app_build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$ROOT/dist/$VERSION/Tidewatch.app/Contents/Info.plist")"
+        python3 "$ROOT/scripts/appcast.py" check "$appcast" --version "$VERSION" --build "$app_build" --length "$bytes"
+    fi
 
     ssh "$PUBLISH_HOST" "mkdir -p '$PUBLISH_SITE_ROOT' '$PUBLISH_DOWNLOADS'"
     # DMGs live outside the page folder, so the --delete sync below never touches them.
@@ -69,6 +74,15 @@ deploy() {
         if grep -q "Version $VERSION" <<<"$page"; then echo "ok   $base/ shows $VERSION"; else echo "FAIL $base/ does not show $VERSION"; failed=1; fi
         length="$(curl -fsSIL "$base/download/Tidewatch.dmg" | tr -d '\r' | awk 'tolower($1) == "content-length:" { n = $2 } END { print n }')"
         if [[ "$length" == "$bytes" ]]; then echo "ok   $base/download/Tidewatch.dmg ($bytes bytes)"; else echo "FAIL $base/download/Tidewatch.dmg (got '${length:-nothing}', want $bytes)"; failed=1; fi
+        if [[ -f "$appcast" ]]; then
+            if curl -fsS "$base/updates/appcast.xml" | grep -q "<sparkle:shortVersionString>$VERSION<"; then
+                echo "ok   $base/updates/appcast.xml offers $VERSION"
+            else
+                echo "FAIL $base/updates/appcast.xml does not offer $VERSION"; failed=1
+            fi
+            length="$(curl -fsSIL "$base/download/$name" | tr -d '\r' | awk 'tolower($1) == "content-length:" { n = $2 } END { print n }')"
+            if [[ "$length" == "$bytes" ]]; then echo "ok   $base/download/$name (what Sparkle downloads)"; else echo "FAIL $base/download/$name"; failed=1; fi
+        fi
     done
     [[ $failed -eq 0 ]] || { echo "site: deployed, but a check failed" >&2; exit 1; }
     echo "site: Tidewatch $VERSION is live"

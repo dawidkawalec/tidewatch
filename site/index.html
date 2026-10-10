@@ -95,7 +95,7 @@
       <ul class="stats">
         <li class="card stat" data-reveal><p class="num">4<span>states</span></p><p>Working, needs you, ready for review and idle. Colors, not text.</p></li>
         <li class="card stat" data-reveal style="--d:.08s"><p class="num">1<span>click</span></p><p>From the lamp to the right VS Code window and its Claude tab.</p></li>
-        <li class="card stat" data-reveal style="--d:.16s"><p class="num">0<span>bytes sent</span></p><p>No network code, no account, no analytics. It all stays on your Mac.</p></li>
+        <li class="card stat" data-reveal style="--d:.16s"><p class="num">0<span>data collected</span></p><p>No account, no analytics, no telemetry. Your sessions never leave your Mac.</p></li>
         <li class="card stat" data-reveal style="--d:.24s"><p class="num">2<span>sounds</span></p><p>"Glass" when a session needs you, "Tink" when it finishes a turn.</p></li>
       </ul>
     </div>
@@ -167,7 +167,7 @@
         <h2 id="privacy-title" class="statement" data-reveal style="--d:.08s">Everything stays on your Mac.</h2>
       </div>
       <ul class="facts">
-        <li class="card fact" data-reveal><h3>No network code</h3><p>Tidewatch never connects to the internet. No account, no analytics, no telemetry.</p></li>
+        <li class="card fact" data-reveal><h3>Only an update check</h3><p>Once a day Tidewatch asks this page whether a new version is out, and that is its only connection. No account, no analytics, no telemetry, nothing about your sessions.</p></li>
         <li class="card fact" data-reveal style="--d:.08s"><h3>Built on Claude Code's own hooks</h3><p>A tiny helper writes one small status file per session: project folder, status and a one-line preview of the tool call waiting for you. No prompts, no code, no transcripts.</p></li>
         <li class="card fact" data-reveal><h3>Connect and disconnect in one click</h3><p>Tidewatch adds only its own entries to <code>~/.claude/settings.json</code>, backs the file up first and removes exactly those entries when you disconnect.</p></li>
         <li class="card fact" data-reveal style="--d:.08s"><h3>Signed and notarized</h3><p>Built with an Apple Developer ID and checked by Apple's notary service, so macOS opens it without warnings.</p></li>
@@ -198,11 +198,14 @@
           <span>Download Tidewatch __VERSION__</span>
           <span class="btn-dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v13m0 0-5-5m5 5 5-5"/></svg></span>
         </a>
-        <p class="sha-label">SHA-256 of Tidewatch-__VERSION__.dmg</p>
-        <div class="sha">
-          <code data-sha>__DMG_SHA256__</code>
-          <button class="sha-copy" type="button" data-copy aria-label="Copy the SHA-256 checksum">Copy</button>
-        </div>
+        <details class="verify">
+          <summary>Verify the download</summary>
+          <p>Optional. macOS already checks Apple's notarization when you open the app. To compare the file yourself, run <code>shasum -a 256 Tidewatch-__VERSION__.dmg</code> and check that it prints:</p>
+          <div class="sha">
+            <code data-sha>__DMG_SHA256__</code>
+            <button class="sha-copy" type="button" data-copy aria-label="Copy the SHA-256 checksum">Copy</button>
+          </div>
+        </details>
       </aside>
     </div>
   </section>
@@ -228,6 +231,10 @@
           <details>
             <summary>Does it work with the Claude Code CLI?</summary>
             <p>Yes. CLI sessions get their lamp too. A click brings Terminal, iTerm, Ghostty or Warp to the front, or opens the folder in VS Code when the session runs in VS Code's terminal.</p>
+          </details>
+          <details>
+            <summary>How do updates work?</summary>
+            <p>Tidewatch checks for a new version once a day and asks before installing it. You can also choose <em>Check for Updates…</em> in the menu bar. Every update is signed, and Tidewatch refuses one that is not.</p>
           </details>
           <details>
             <summary>What about Intel Macs?</summary>
@@ -260,7 +267,7 @@
 
 <footer class="site-footer">
   <div class="wrap footer-row">
-    <p><b>Tidewatch</b> by <a href="https://kawalec.pl/">Dawid Kawalec</a> · <a href="https://craftweb.pl/">CraftWeb</a> · Also by me: <a href="https://captylo.com/">Captylo</a></p>
+    <p><b>Tidewatch</b> by <a href="https://kawalec.pl/">Dawid Kawalec</a> · <a href="https://kawalec.pl/#products">More of my products</a> · <a href="https://captylo.com/">Captylo</a></p>
     <p class="footer-note">Not affiliated with Anthropic. This page sets no cookies and runs no analytics.</p>
   </div>
 </footer>

@@ -7,7 +7,7 @@ A tiny macOS widget that shows every running Claude Code session as a glass stat
 - Click a row: the right VS Code window and the session's Claude tab come to the front
 - Sounds when a session needs approval ("Glass") and when it finishes a turn ("Tink")
 
-Everything stays on your Mac. Tidewatch has no network code: Claude Code hooks write small state files to `~/Library/Application Support/Tidewatch/sessions/`, and the widget reads them.
+Everything stays on your Mac: Claude Code hooks write small state files to `~/Library/Application Support/Tidewatch/sessions/`, and the widget reads them. The only network access is a daily update check (Sparkle) against https://kawalec.pl/tidewatch/updates/appcast.xml; **Check for Updates…** in the menu bar runs it by hand.
 
 ## Requirements
 

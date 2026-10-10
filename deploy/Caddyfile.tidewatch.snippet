@@ -15,13 +15,19 @@
         header X-Content-Type-Options nosniff
         header /assets/* Cache-Control "public, max-age=604800"
         header / Cache-Control "no-cache"
+        # Sparkle appcast and release notes: never cached.
+        header /updates/* Cache-Control "no-cache"
         file_server
     }
 }
 
-# In each site block that shows the page (kawalec.pl and the craftweb_site snippet):
+# In the kawalec.pl site block:
 #
 #     redir /tidewatch /tidewatch/ permanent
 #     handle_path /tidewatch/* {
 #         import tidewatch_site
 #     }
+#
+# In the craftweb_site snippet (the page lives on kawalec.pl only):
+#
+#     redir /tidewatch* https://kawalec.pl{uri} permanent

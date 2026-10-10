@@ -12,13 +12,21 @@ options:
 packages:
   TidewatchCore:
     path: Packages/TidewatchCore
+  # Software updates (EdDSA-signed appcast on kawalec.pl/tidewatch), same version as Captylo. MIT.
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.9.4
 
 settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
-    MARKETING_VERSION: "0.2.0"
+    MARKETING_VERSION: "0.3.0"
     CURRENT_PROJECT_VERSION: "1"
+    # Sparkle's EdDSA public key (public, fine in the repo). The private half lives only in the
+    # owner's login Keychain (account "tidewatch", backup ~/.claude/secrets/tidewatch-sparkle-ed25519.key);
+    # REPLACE_ME here would keep the updater off.
+    SPARKLE_PUBLIC_ED_KEY: "BPCA+XUY3KYIguV98maO0DkczltdcIExlajJuTT8vAI="
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "-"
@@ -43,6 +51,8 @@ targets:
       - path: Tidewatch
     dependencies:
       - package: TidewatchCore
+      - package: Sparkle
+        product: Sparkle
       # The hook helper ships next to the app executable (Contents/MacOS/tidewatch-hook);
       # HelperInstaller copies it to Application Support at launch.
       - target: TidewatchHook
@@ -68,6 +78,11 @@ targets:
         NSHumanReadableCopyright: "Copyright 2026 Dawid Kawalec"
         # Bundled Manrope + Inter (Resources/Fonts, SIL OFL), registered at launch.
         ATSApplicationFontsPath: "."
+        # Sparkle: started by AppState only in a public build with a real public key.
+        SUFeedURL: https://kawalec.pl/tidewatch/updates/appcast.xml
+        SUPublicEDKey: $(SPARKLE_PUBLIC_ED_KEY)
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
     settings:
       base:
         PRODUCT_NAME: Tidewatch
