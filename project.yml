@@ -1,0 +1,120 @@
+name: Tidewatch
+options:
+  bundleIdPrefix: pl.craftweb
+  deploymentTarget:
+    macOS: "14.4"
+  xcodeVersion: "26.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+  groupSortPosition: top
+  minimumXcodeGenVersion: "2.40.0"
+
+packages:
+  TidewatchCore:
+    path: Packages/TidewatchCore
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    ENABLE_HARDENED_RUNTIME: YES
+    ENABLE_APP_SANDBOX: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+    ARCHS: arm64
+  configs:
+    Debug:
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+    Release:
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+      SWIFT_COMPILATION_MODE: wholemodule
+
+targets:
+  Tidewatch:
+    type: application
+    platform: macOS
+    sources:
+      - path: Tidewatch
+    dependencies:
+      - package: TidewatchCore
+      # The hook helper ships next to the app executable (Contents/MacOS/tidewatch-hook);
+      # HelperInstaller copies it to Application Support at launch.
+      - target: TidewatchHook
+        embed: true
+        codeSign: false
+        copy:
+          destination: executables
+    entitlements:
+      path: Tidewatch/Tidewatch.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+    info:
+      path: Tidewatch/Info.plist
+      properties:
+        CFBundleName: Tidewatch
+        CFBundleDisplayName: Tidewatch
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.developer-tools
+        NSHumanReadableCopyright: "Copyright 2026 Dawid Kawalec"
+        # Bundled Manrope + Inter (Resources/Fonts, SIL OFL), registered at launch.
+        ATSApplicationFontsPath: "."
+    settings:
+      base:
+        PRODUCT_NAME: Tidewatch
+        PRODUCT_MODULE_NAME: Tidewatch
+        PRODUCT_BUNDLE_IDENTIFIER: pl.craftweb.tidewatch
+        GENERATE_INFOPLIST_FILE: NO
+        COMBINE_HIDPI_IMAGES: YES
+
+  TidewatchHook:
+    type: tool
+    platform: macOS
+    sources:
+      - path: TidewatchHook
+    dependencies:
+      - package: TidewatchCore
+    settings:
+      base:
+        PRODUCT_NAME: tidewatch-hook
+        PRODUCT_BUNDLE_IDENTIFIER: pl.craftweb.tidewatch.hook
+        SKIP_INSTALL: YES
+
+  TidewatchTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: TidewatchTests
+    dependencies:
+      - target: Tidewatch
+      - package: TidewatchCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: pl.craftweb.tidewatch.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Tidewatch.app/Contents/MacOS/Tidewatch"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+
+schemes:
+  Tidewatch:
+    build:
+      targets:
+        Tidewatch: all
+        TidewatchTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - TidewatchTests
+    archive:
+      config: Release
