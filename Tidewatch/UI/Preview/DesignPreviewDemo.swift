@@ -11,11 +11,14 @@ extension DesignPreview {
     enum Demo {
         struct Lamp: Equatable {
             var order: Int
+            /// The project folder; tabs of one folder share a VS Code window.
             var name: String
             var status: SessionStatus
             var activity: SessionActivity
             var tool: String?
             var detail: String?
+            /// The conversation's title, as on the VS Code tab.
+            var title: String?
         }
 
         struct Scene: Equatable {
@@ -63,15 +66,17 @@ extension DesignPreview {
 
         static let period: TimeInterval = 12
 
+        /// Omnira is one window with two tabs, so the list shows a window header.
         static let initial = Scene(lamps: [
-            Lamp(order: 1, name: "Captylo", status: .working, activity: .coding),
-            Lamp(order: 3, name: "Omnira", status: .working, activity: .runningTests),
-            Lamp(order: 4, name: "Craftweb", status: .idle, activity: .working),
-            Lamp(order: 5, name: "Blog AI", status: .working, activity: .researching),
+            Lamp(order: 1, name: "Captylo", status: .working, activity: .coding, title: "Onboarding flow"),
+            Lamp(order: 3, name: "Omnira", status: .working, activity: .runningTests, title: "Test suite cleanup"),
+            Lamp(order: 4, name: "Omnira", status: .idle, activity: .working, title: "API rate limits"),
+            Lamp(order: 5, name: "Craftweb", status: .idle, activity: .working, title: "Pricing page copy"),
+            Lamp(order: 6, name: "Blog AI", status: .working, activity: .researching, title: "Weekly digest"),
         ])
 
         static let steps: [Step] = [
-            Step(at: 1.2, change: .appear(Lamp(order: 2, name: "Zorko", status: .working, activity: .coding))),
+            Step(at: 1.2, change: .appear(Lamp(order: 2, name: "Zorko", status: .working, activity: .coding, title: "Checkout redesign"))),
             Step(at: 2.6, change: .update(name: "Zorko", status: .needsApproval, tool: "Bash", detail: "npm install")),
             Step(at: 4.0, change: .expand(true)),
             Step(at: 5.3, change: .hover(1)),
@@ -85,8 +90,10 @@ extension DesignPreview {
 
         static func sessions(for scene: Scene, now: Date) -> [SessionState] {
             scene.lamps.map { lamp in
-                var state = SessionState(sessionId: "demo-\(lamp.order)", cwd: "/Users/demo/\(lamp.name)", host: .vscode, terminalApp: nil, pid: nil, now: now)
+                // The pid places the tab in its window (`DesignPreview.windows(for:)`).
+                var state = SessionState(sessionId: "demo-\(lamp.order)", cwd: "/Users/demo/\(lamp.name)", host: .vscode, terminalApp: nil, pid: Int32(2000 + lamp.order), now: now)
                 state.startedConversation = true
+                state.title = lamp.title
                 state.status = lamp.status
                 state.activity = lamp.activity
                 state.tool = lamp.tool

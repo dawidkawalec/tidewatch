@@ -13,7 +13,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN="${TIDEWATCH_BIN:-$ROOT/.local-build/Build/Products/Debug/Tidewatch.app/Contents/MacOS/Tidewatch}"
 BACKDROP="${SNAP_BACKDROP:-$ROOT/docs/design/backdrops/dusk.jpg}"
 PERIOD=12
-SKIP=3          # seconds dropped at the start (the window appearing, first frames)
+EXPAND_AT=4.0   # DesignPreview.Demo.steps: the list wells out
+SKIP=3         # seconds dropped at the start (the window appearing, first frames)
 RECORD=$((SKIP + 2 * PERIOD + 1))
 
 [[ $# -eq 1 ]] || { echo "usage: scripts/record-demo.sh <out-basename>" >&2; exit 2; }
@@ -38,20 +39,17 @@ for _ in $(seq 1 100); do
 done
 [[ -n "$frame" ]] || { echo "record: no WINDOW_FRAME within 10 s" >&2; exit 1; }
 
-start="$(sed -n 's/^DEMO_START=\(.*\)$/\1/p' "$log" | head -n 1)"
 period="$(sed -n 's/^DEMO_PERIOD=\(.*\)$/\1/p' "$log" | head -n 1)"
 [[ "$period" == "$PERIOD" || "$period" == "$PERIOD.0" ]] || { echo "record: demo period is '$period', script expects $PERIOD" >&2; exit 1; }
 # The video shows the pointer: park it in the top left corner, far from the widget.
 swift -e 'import CoreGraphics; CGWarpMouseCursorPosition(CGPoint(x: 40, y: 40))' 2>/dev/null || true
-began="$(python3 -c 'import time; print(time.time())')"
 screencapture -x -v -V "$RECORD" -R"$frame" "$raw"
 [[ -s "$raw" ]] || { echo "record: screencapture wrote nothing (Screen Recording permission?)" >&2; exit 1; }
 
-# Cut from 0.3 s into a cycle (the calm first frame). CAPTURE_LAG: screencapture's start-up delay.
-cut="$(python3 -c "
-skip, period, lag = $SKIP, $PERIOD, ${CAPTURE_LAG:-0.25}
-phase = ($began + lag + skip - $start) % period
-print(round(skip + (0.3 - phase) % period, 3))")"
+# Cut from 0.3 s into a cycle (the calm first frame). The cycle's phase is read from the video
+# itself (the moment the list wells out, DesignPreview.Demo's expand step at 4.0 s):
+# screencapture's start-up delay varies by more than a second.
+cut="$(python3 "$ROOT/scripts/demo_phase.py" "$raw" --skip "$SKIP" --period "$PERIOD" --expand-at "$EXPAND_AT")"
 ffmpeg -loglevel error -y -ss "$cut" -t "$PERIOD" -i "$raw" -an \
     -vf "fps=60,format=yuv420p" -c:v libx264 -preset slow -crf 22 -movflags +faststart "$OUT.mp4"
 ffmpeg -loglevel error -y -i "$OUT.mp4" -frames:v 1 "$raw.png"

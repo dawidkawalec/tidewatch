@@ -33,6 +33,16 @@ struct DesignPreviewDemoTests {
         #expect(sawApproval)
     }
 
+    /// The video shows a VS Code window with two tabs and conversation titles.
+    @Test func theDemoHasAWindowWithTwoTabsAndTitles() {
+        let sessions = Demo.sessions(for: Demo.initial, now: Date())
+        let windows = DesignPreview.windows(for: sessions)
+        let omnira = sessions.filter { $0.project == "Omnira" }.compactMap { $0.pid.flatMap { windows[$0] } }
+        #expect(omnira.count == 2)
+        #expect(Set(omnira).count == 1)
+        #expect(sessions.allSatisfy { $0.title != nil })
+    }
+
     @Test func sessionsFollowTheScene() {
         let now = Date(timeIntervalSince1970: 1_791_620_000)
         let scene = Demo.initial.applying(.appear(Demo.Lamp(order: 2, name: "Zorko", status: .working, activity: .coding)))

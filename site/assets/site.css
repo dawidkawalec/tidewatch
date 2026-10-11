@@ -109,7 +109,7 @@ em{font-style:normal;color:var(--fg)}
   display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(24px,5vw,80px);padding:clamp(28px,4vw,64px) clamp(28px,7vw,120px) clamp(28px,4vw,64px) clamp(28px,5vw,80px);
   background:url(img/dusk.webp) center/cover no-repeat}
 .stage::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(10,12,22,.78),rgba(10,12,22,.35) 55%,rgba(10,12,22,.1))}
-.screen{position:relative;width:clamp(260px,25vw,352px);aspect-ratio:352/600;border-radius:var(--r-lg);overflow:hidden;
+.screen{position:relative;width:clamp(280px,28vw,402px);aspect-ratio:402/600;border-radius:var(--r-lg);overflow:hidden;
   box-shadow:0 50px 90px -40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.22);transition:transform .7s var(--spring),box-shadow .5s var(--ease)}
 .screen video{width:100%;height:100%;object-fit:cover}
 .stage:hover .screen{transform:translateY(-6px) scale(1.015);box-shadow:0 60px 110px -40px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.32)}
