@@ -8,31 +8,28 @@ struct WidgetRootView: View {
     let model: WidgetModel
     let settings: AppSettings
     let actions: WidgetActions
-    @Namespace private var glass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let metrics = store.metrics
         let height = WidgetMetrics.canvas.height
-        GlassContainer {
-            ZStack(alignment: .topLeading) {
-                Color.clear
-                if model.isExpanded {
-                    SessionPanelView(groups: store.groups, hoveredIndex: model.hoveredIndex, isConnected: settings.hooksConnected, metrics: metrics, actions: actions)
-                        .frame(width: metrics.panelRect.width, height: metrics.panelRect.height)
-                        .widgetGlass("panel", in: RoundedRectangle(cornerRadius: GlassTokens.Radius.panel, style: .continuous), namespace: glass)
-                        .position(x: metrics.panelRect.midX, y: height - metrics.panelRect.midY)
-                        .transition(reduceMotion ? .opacity : Self.emerge)
-                }
-                LampColumn(sessions: store.sessions, hoveredIndex: model.hoveredIndex, metrics: metrics, actions: actions)
-                    .frame(width: metrics.columnRect.width, height: metrics.columnRect.height)
-                    .widgetGlass("column", in: Capsule(style: .continuous), namespace: glass)
-                    .position(x: metrics.columnRect.midX, y: height - metrics.columnRect.midY)
+        ZStack(alignment: .topLeading) {
+            Color.clear
+            if model.isExpanded {
+                SessionPanelView(groups: store.groups, hoveredIndex: model.hoveredIndex, isConnected: settings.hooksConnected, metrics: metrics, actions: actions)
+                    .frame(width: metrics.panelRect.width, height: metrics.panelRect.height)
+                    .widgetGlass(in: RoundedRectangle(cornerRadius: GlassTokens.Radius.panel, style: .continuous), tint: settings.glassTint.fill)
+                    .position(x: metrics.panelRect.midX, y: height - metrics.panelRect.midY)
+                    .transition(reduceMotion ? .opacity : Self.emerge)
             }
-            .frame(width: WidgetMetrics.canvas.width, height: height)
-            // The capsule grows and shrinks like liquid when sessions come and go.
-            .animation(reduceMotion ? nil : GlassMotion.liquid, value: store.sessions.map(\.id))
+            LampColumn(sessions: store.sessions, hoveredIndex: model.hoveredIndex, metrics: metrics, actions: actions)
+                .frame(width: metrics.columnRect.width, height: metrics.columnRect.height)
+                .widgetGlass(in: Capsule(style: .continuous), tint: settings.glassTint.fill)
+                .position(x: metrics.columnRect.midX, y: height - metrics.columnRect.midY)
         }
+        .frame(width: WidgetMetrics.canvas.width, height: height)
+        // The capsule grows and shrinks like liquid when sessions come and go.
+        .animation(reduceMotion ? nil : GlassMotion.liquid, value: store.sessions.map(\.id))
         .environment(\.appearsActive, true)
         .environment(\.controlActiveState, .key)
         .ignoresSafeArea()

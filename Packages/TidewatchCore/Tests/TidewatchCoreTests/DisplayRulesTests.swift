@@ -79,6 +79,15 @@ struct DisplayRulesTests {
         #expect(DisplayRules.activityLabel(.compacting) == "Compacting…")
     }
 
+    /// The fade time is the user's choice; nil keeps the lamp until the session is opened.
+    @Test func awaitingReviewFadesAfterTheChosenTimeOrNever() {
+        let s = session("a", status: .awaitingReview)
+        #expect(DisplayRules.displayStatus(s, now: t0.addingTimeInterval(301), acknowledgedAt: nil, reviewFade: 300) == .idle)
+        #expect(DisplayRules.displayStatus(s, now: t0.addingTimeInterval(299), acknowledgedAt: nil, reviewFade: 300) == .awaitingReview)
+        #expect(DisplayRules.displayStatus(s, now: t0.addingTimeInterval(86_400), acknowledgedAt: nil, reviewFade: nil) == .awaitingReview)
+        #expect(DisplayRules.displayStatus(s, now: t0.addingTimeInterval(86_400), acknowledgedAt: t0, reviewFade: nil) == .idle)
+    }
+
     @Test func elapsedIsCompact() {
         #expect(DisplayRules.elapsed(since: t0, now: t0.addingTimeInterval(20)) == "now")
         #expect(DisplayRules.elapsed(since: t0, now: t0.addingTimeInterval(125)) == "2m")

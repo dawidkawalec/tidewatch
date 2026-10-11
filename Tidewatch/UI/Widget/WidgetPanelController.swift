@@ -15,12 +15,14 @@ final class WidgetPanelController {
     private var hoverTarget: Bool?
     private var screenObserver: NSObjectProtocol?
     private var watchesPointer = true
+    private let settings: AppSettings
 
     var windowNumber: Int { panel.windowNumber }
     var frame: NSRect { panel.frame }
 
     init(store: SessionStore, settings: AppSettings, actions: WidgetActions, model: WidgetModel = WidgetModel()) {
         self.store = store
+        self.settings = settings
         self.model = model
         hostingView = WidgetHostingView(rootView: WidgetRootView(store: store, model: model, settings: settings, actions: actions))
         panel.contentView = hostingView
@@ -34,11 +36,23 @@ final class WidgetPanelController {
         watchesPointer = watchPointer
         reposition()
         panel.orderFrontRegardless()
+        applyBlur()
         screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.reposition() }
         }
         if watchPointer { startPointerWatch() }
         Log.ui.debug("widget shown")
+    }
+
+    /// The window's blur radius from the settings, again whenever the user picks another one.
+    private func applyBlur() {
+        let reduce = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+        let radius = withObservationTracking {
+            settings.glassBlur.radius
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.applyBlur() }
+        }
+        WindowBlur.set(reduce ? 0 : radius, on: panel)
     }
 
     /// Closes the panel at once (after a click on a row).

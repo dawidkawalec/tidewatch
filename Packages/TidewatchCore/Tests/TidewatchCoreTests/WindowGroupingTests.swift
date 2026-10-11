@@ -26,9 +26,17 @@ struct WindowGroupingTests {
         #expect(groups.map { $0.map(\.sessionId) } == [["a", "d"], ["b", "c"]])
     }
 
-    @Test func aWindowWithOneTabIsNamedAfterItsFolder() {
-        let names = DisplayRules.rowNames(in: [state("a", cwd: "/w/promo-kit", firstSeen: 0, title: "Skills audit")])
-        #expect(names == ["a": "promo-kit"])
+    @Test func aWindowWithOneTabIsNamedAfterItsConversation() {
+        #expect(DisplayRules.rowNames(in: [state("a", cwd: "/w/promo-kit", firstSeen: 0, title: "Skills audit")]) == ["a": "Skills audit"])
+        #expect(DisplayRules.rowNames(in: [state("b", cwd: "/w/promo-kit", firstSeen: 0)]) == ["b": "promo-kit"])
+    }
+
+    /// The second line: status, then the project, unless the title already is the project.
+    @Test func theStatusLineEndsWithTheProject() {
+        let titled = state("a", cwd: "/w/atlas", firstSeen: 0, title: "Onboarding review")
+        #expect(DisplayRules.projectSuffix(titled, name: "Onboarding review") == "atlas")
+        #expect(DisplayRules.projectSuffix(titled, name: "atlas #2") == "atlas")
+        #expect(DisplayRules.projectSuffix(state("b", cwd: "/w/harbor", firstSeen: 0), name: "harbor") == nil)
     }
 
     @Test func tabsOfOneWindowAreNamedAfterTheirConversations() {

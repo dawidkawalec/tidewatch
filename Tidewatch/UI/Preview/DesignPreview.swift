@@ -19,8 +19,10 @@ enum DesignPreview {
     private static var retained: [AnyObject] = []
 
     static func sessions(for target: Target, now: Date) -> [SessionState] {
-        func make(_ order: Int, _ name: String, _ status: SessionStatus, _ activity: SessionActivity = .working, minutes: Double, tool: String? = nil, detail: String? = nil) -> SessionState {
-            var state = SessionState(sessionId: "preview-\(order)", cwd: "/Users/demo/\(name)", host: .vscode, terminalApp: nil, pid: nil, now: now)
+        func make(_ order: Int, _ name: String, _ status: SessionStatus, _ activity: SessionActivity = .working, minutes: Double, tool: String? = nil, detail: String? = nil, title: String? = nil) -> SessionState {
+            // Tabs of one folder share a window (`windows(for:)`).
+            var state = SessionState(sessionId: "preview-\(order)", cwd: "/Users/demo/\(name)", host: .vscode, terminalApp: nil, pid: Int32(1000 + order), now: now)
+            state.title = title
             state.startedConversation = true
             state.status = status
             state.activity = activity
@@ -32,15 +34,18 @@ enum DesignPreview {
             return state
         }
         let five = [
-            make(1, "Captylo", .working, .coding, minutes: 2),
-            make(2, "Zorko", .needsApproval, minutes: 5, tool: "Bash", detail: "npm install"),
-            make(3, "Omnira", .working, .runningTests, minutes: 12),
+            make(1, "Captylo", .working, .coding, minutes: 2, title: "Onboarding flow"),
+            make(2, "Zorko", .needsApproval, minutes: 5, tool: "Bash", detail: "npm install", title: "Checkout redesign"),
+            make(3, "Omnira", .working, .runningTests, minutes: 12, title: "Test suite cleanup"),
             make(4, "Craftweb", .idle, minutes: 60),
-            make(5, "Blog AI", .working, .researching, minutes: 3),
+            make(5, "Blog AI", .working, .researching, minutes: 3, title: "Weekly digest"),
         ]
         switch target {
-        case .collapsed, .expanded:
+        case .collapsed:
             return five
+        case .expanded:
+            // One window with two tabs (Zorko), the rest one tab each.
+            return five + [make(6, "Zorko", .awaitingReview, minutes: 1, title: "iOS App Review feedback")]
         case .empty, .disconnected:
             return []
         case .demo:
@@ -53,6 +58,18 @@ enum DesignPreview {
                 make(9, "Lumen", .working, .runningAgents, minutes: 7),
             ]
         }
+    }
+
+    /// Invented VS Code windows: one per folder, keyed by the sessions' pids.
+    static func windows(for sessions: [SessionState]) -> [Int32: Int32] {
+        var byFolder: [String: Int32] = [:]
+        var windows: [Int32: Int32] = [:]
+        for state in sessions {
+            let window = byFolder[state.folder] ?? Int32(9000 + byFolder.count)
+            byFolder[state.folder] = window
+            if let pid = state.pid { windows[pid] = window }
+        }
+        return windows
     }
 
     static func run(target raw: String) {
@@ -71,14 +88,18 @@ enum DesignPreview {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("tidewatch-preview-\(UUID().uuidString)", isDirectory: true)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let files = SessionFileStore(directory: folder)
-        for state in sessions(for: target, now: now) {
+        let invented = sessions(for: target, now: now)
+        for state in invented {
             try? files.write(state, to: files.fileURL(for: state.sessionId))
         }
+        let windows = windows(for: invented)
+        var system = ClaudeSystem.none
+        system.parent = { windows[$0] }
         let suite = "tidewatch-preview"
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         let isDemo = target == .demo
-        let store = SessionStore(fileStore: files, acknowledged: AcknowledgedStore(defaults: defaults), isAlive: { _ in true }, clock: { isDemo ? Date() : now })
+        let store = SessionStore(fileStore: files, acknowledged: AcknowledgedStore(defaults: defaults), isAlive: { _ in true }, clock: { isDemo ? Date() : now }, system: system)
         store.reload()
         let settings = AppSettings(defaults: defaults)
         settings.hooksConnected = target != .disconnected

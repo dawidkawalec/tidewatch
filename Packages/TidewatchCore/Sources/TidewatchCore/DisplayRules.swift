@@ -3,15 +3,17 @@ import Foundation
 /// How a session state is shown at a given moment (spec 4.2 to 4.4). Pure: every function takes
 /// `now`, so a render never depends on a timer having fired.
 public enum DisplayRules {
-    /// "Awaiting review" fades to "Idle" after this long.
+    /// "Awaiting review" fades to "Idle" after this long by default.
     public static let reviewToIdle: TimeInterval = 10 * 60
     /// A session with no event for this long is dropped (crash without `SessionEnd`).
     public static let staleAfter: TimeInterval = 6 * 60 * 60
 
-    public static func displayStatus(_ state: SessionState, now: Date, acknowledgedAt: Date?) -> SessionStatus {
+    /// `reviewFade`: how long "Awaiting review" lasts on its own (the user's setting); nil keeps it
+    /// until the session is opened from the widget or gets a new event.
+    public static func displayStatus(_ state: SessionState, now: Date, acknowledgedAt: Date?, reviewFade: TimeInterval? = reviewToIdle) -> SessionStatus {
         guard state.status == .awaitingReview else { return state.status }
         if let acknowledgedAt, acknowledgedAt >= state.lastEvent { return .idle }
-        if now.timeIntervalSince(state.statusSince) > reviewToIdle { return .idle }
+        if let reviewFade, now.timeIntervalSince(state.statusSince) > reviewFade { return .idle }
         return .awaitingReview
     }
 
@@ -56,17 +58,19 @@ public enum DisplayRules {
         return keys.compactMap { groups[$0] }
     }
 
-    /// Row titles of one window's sessions, keyed by session id: the folder name for a window with
-    /// one session; with several, each conversation's title, or "folder #n" while it has none.
+    /// Row titles of one window's sessions, keyed by session id: each conversation's title, or
+    /// while it has none the folder name ("folder #n" when the window has several tabs).
     public static func rowNames(in group: [SessionState]) -> [String: String] {
-        guard group.count > 1 else {
-            return Dictionary(uniqueKeysWithValues: group.map { ($0.sessionId, $0.project) })
-        }
         var names: [String: String] = [:]
         for (index, session) in group.enumerated() {
-            names[session.sessionId] = session.title ?? "\(session.project) #\(index + 1)"
+            names[session.sessionId] = session.title ?? (group.count > 1 ? "\(session.project) #\(index + 1)" : session.project)
         }
         return names
+    }
+
+    /// The project shown after the status ("Idle · atlas"); nil when the row title already is it.
+    public static func projectSuffix(_ state: SessionState, name: String) -> String? {
+        name == state.project ? nil : state.project
     }
 
     /// Row titles of all groups, keyed by session id. A name that still repeats (two terminal

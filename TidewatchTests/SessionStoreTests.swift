@@ -179,7 +179,7 @@ struct SessionStoreTests {
         store.reload()
         #expect(store.groups.map(\.name) == ["atlas", "promo-kit"])
         #expect(store.groups.map { $0.sessions.map(\.id) } == [["zorko", "onboarding"], ["skills"]])
-        #expect(store.sessions.map(\.name) == ["Checkout redesign", "Onboarding review", "promo-kit"])
+        #expect(store.sessions.map(\.name) == ["Checkout redesign", "Onboarding review", "Skills audit"])
         #expect(store.sessions.map(\.status) == [.needsApproval, .idle, .working])
     }
 
@@ -197,7 +197,7 @@ struct SessionStoreTests {
         )
         store.reload()
         #expect(store.sessions.map(\.id) == ["restored"])
-        #expect(store.sessions.map(\.name) == ["kawalec"])
+        #expect(store.sessions.map(\.name) == ["Products section"])
     }
 
     /// The agent's `cd` into another repo must not rename the lamp.

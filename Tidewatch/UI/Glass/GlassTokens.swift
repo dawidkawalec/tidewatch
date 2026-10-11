@@ -35,18 +35,12 @@ enum GlassTokens {
         static let fallbackY: CGFloat = 10
     }
 
-    /// Liquid Glass of the widget.
+    /// The widget's light glass (`WidgetGlass`, `WindowBlur`): the background shows through it.
+    /// The blur radius and the tint density are the user's (`AppSettings.GlassBlur`, `GlassTint`).
     enum Liquid {
-        /// Black tint over the glass: the owner asked for 10-20 % more darkening for legibility.
-        static let dim: Double = 0.15
-        /// Glass shapes closer than this flow into each other (`GlassEffectContainer`). It is
-        /// smaller than `WidgetMetrics.panelGap`, so the panel merges with the column only while it
-        /// emerges from it, then detaches like a drop.
-        static let mergeSpacing: CGFloat = 12
+        /// White sheen fading from the top edge to the middle.
+        static let sheen: Double = 0.16
     }
-
-    /// `TIDEWATCH_GLASS_FALLBACK=1` draws the macOS 14/15 material path on macOS 26 (to check it).
-    static let forcesFallback: Bool = ProcessInfo.processInfo.environment["TIDEWATCH_GLASS_FALLBACK"] == "1"
 }
 
 enum GlassColor {
@@ -62,11 +56,12 @@ enum GlassColor {
     static let success = Color(hex: 0x4CD68A)
     /// Needs approval / awaiting review lamp and text (the mockups' orange).
     static let attention = Color(hex: 0xFF9F43)
-    /// Status text in the attention colour: a deeper orange on light glass, so it keeps contrast.
+    /// Status text in the attention colour: a deeper orange on light glass, so it keeps contrast
+    /// over warm wallpapers seen through the clear glass.
     static let attentionText = Color(nsColor: NSColor(name: nil) { appearance in
         appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
             ? NSColor(srgbRed: 1.0, green: 0.62, blue: 0.26, alpha: 1)
-            : NSColor(srgbRed: 0.80, green: 0.40, blue: 0.04, alpha: 1)
+            : NSColor(srgbRed: 0.68, green: 0.29, blue: 0.0, alpha: 1)
     })
     static let idleLamp = Color(hex: 0x9AA3AD)
     /// The VS Code glyph in the rows.

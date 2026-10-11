@@ -45,6 +45,8 @@ final class SessionStore {
     /// The user's home folder, for `DisplayRules.isShown` (Claude Code's own `~/.claude`).
     @ObservationIgnored private let home: String
     @ObservationIgnored private let system: ClaudeSystem
+    /// The user's "Awaiting review" fade time (nil = never).
+    @ObservationIgnored private let reviewFade: () -> TimeInterval?
     @ObservationIgnored private var watcher: SessionFolderWatcher?
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private var lastStatuses: [String: SessionStatus] = [:]
@@ -56,8 +58,10 @@ final class SessionStore {
         isAlive: @escaping @Sendable (Int32) -> Bool = ProcessLiveness.isAlive,
         clock: @escaping @Sendable () -> Date = { Date() },
         home: String = NSHomeDirectory(),
-        system: ClaudeSystem = .none
+        system: ClaudeSystem = .none,
+        reviewFade: @escaping () -> TimeInterval? = { DisplayRules.reviewToIdle }
     ) {
+        self.reviewFade = reviewFade
         self.fileStore = fileStore
         self.acknowledged = acknowledged
         self.isAlive = isAlive
@@ -112,6 +116,7 @@ final class SessionStore {
         }
         let grouped = DisplayRules.grouped(live, window: windowKey)
         let names = DisplayRules.names(for: grouped)
+        let fade = reviewFade()
         let nextGroups = grouped.map { members in
             SessionGroup(
                 id: members.first.map(windowKey) ?? "",
@@ -119,7 +124,7 @@ final class SessionStore {
                 sessions: members.map { state in
                     DisplayedSession(
                         state: state,
-                        status: DisplayRules.displayStatus(state, now: now, acknowledgedAt: acknowledged.acknowledgedAt(state.sessionId)),
+                        status: DisplayRules.displayStatus(state, now: now, acknowledgedAt: acknowledged.acknowledgedAt(state.sessionId), reviewFade: fade),
                         name: names[state.sessionId] ?? state.project
                     )
                 }

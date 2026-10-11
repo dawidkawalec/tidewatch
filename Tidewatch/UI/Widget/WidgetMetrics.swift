@@ -16,7 +16,6 @@ struct WidgetMetrics: Equatable, Sendable {
     static let groupGap: CGFloat = 10
     static let chevronHeight: CGFloat = 16
     static let maxLamps = 10
-    /// Wider than `GlassTokens.Liquid.mergeSpacing`: at rest the panel is its own drop of glass.
     static let panelGap: CGFloat = 16
     static let panelWidth: CGFloat = 280
     static let headerHeight: CGFloat = 52

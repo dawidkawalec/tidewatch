@@ -24,7 +24,13 @@ final class AppState {
         // Only a normal launch reads Claude Code's own files; the preview and the tests never do.
         let system: ClaudeSystem
         if case .normal = mode { system = .live() } else { system = .none }
-        store = SessionStore(fileStore: SessionFileStore(directory: DataPaths.sessions()), acknowledged: AcknowledgedStore(defaults: defaults), system: system)
+        let settings = settings
+        store = SessionStore(
+            fileStore: SessionFileStore(directory: DataPaths.sessions()),
+            acknowledged: AcknowledgedStore(defaults: defaults),
+            system: system,
+            reviewFade: { settings.reviewFade.seconds }
+        )
         if case .normal = mode {
             updater = AppUpdater(enabled: true)
         } else {
