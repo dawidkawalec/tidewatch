@@ -21,7 +21,10 @@ final class AppState {
     init(mode: LaunchMode, defaults: UserDefaults = .standard) {
         self.mode = mode
         settings = AppSettings(defaults: defaults)
-        store = SessionStore(fileStore: SessionFileStore(directory: DataPaths.sessions()), acknowledged: AcknowledgedStore(defaults: defaults))
+        // Only a normal launch reads Claude Code's own files; the preview and the tests never do.
+        let system: ClaudeSystem
+        if case .normal = mode { system = .live() } else { system = .none }
+        store = SessionStore(fileStore: SessionFileStore(directory: DataPaths.sessions()), acknowledged: AcknowledgedStore(defaults: defaults), system: system)
         if case .normal = mode {
             updater = AppUpdater(enabled: true)
         } else {
@@ -64,6 +67,9 @@ final class AppState {
             },
             connect: { [weak self] in
                 self?.connectHooks()
+            },
+            restart: {
+                AppRestarter.restart()
             }
         )
     }

@@ -71,7 +71,7 @@ final class WidgetPanelController {
 
     private func evaluatePointer() {
         guard watchesPointer else { return }
-        let metrics = WidgetMetrics(sessionCount: store.sessions.count)
+        let metrics = store.metrics
         let point = canvasPoint(NSEvent.mouseLocation)
         let hovered = metrics.lampIndex(at: point) ?? (model.isExpanded ? metrics.rowIndex(at: point) : nil)
         if hovered != model.hoveredIndex { model.hoveredIndex = hovered }
@@ -93,7 +93,7 @@ final class WidgetPanelController {
             guard !Task.isCancelled, let self else { return }
             self.hoverTask = nil
             self.hoverTarget = nil
-            let metrics = WidgetMetrics(sessionCount: self.store.sessions.count)
+            let metrics = self.store.metrics
             guard metrics.hoverRect(expanded: self.model.isExpanded).contains(self.canvasPoint(NSEvent.mouseLocation)) == wanted else { return }
             self.setExpanded(wanted)
         }

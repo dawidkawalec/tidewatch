@@ -13,7 +13,7 @@ struct WidgetMetricsTests {
 
     @Test func emptyShowsOneLampAndOverflowAddsTheChevron() {
         #expect(WidgetMetrics(sessionCount: 0).visibleLamps == 1)
-        let many = WidgetMetrics(sessionCount: 9)
+        let many = WidgetMetrics(sessionCount: WidgetMetrics.maxLamps + 3)
         #expect(many.visibleLamps == WidgetMetrics.maxLamps)
         #expect(many.hasOverflow)
         #expect(many.columnRect.height == CGFloat(WidgetMetrics.maxLamps) * WidgetMetrics.lampPitch + 2 * WidgetMetrics.columnPadding + WidgetMetrics.chevronHeight)
@@ -42,10 +42,49 @@ struct WidgetMetricsTests {
     }
 
     @Test func scrollingListHasNoRowHitTesting() {
-        let m = WidgetMetrics(sessionCount: WidgetMetrics.maxVisibleRows + 1)
+        let m = WidgetMetrics(sessionCount: 9)
+        #expect(m.scrolls)
         let rect = m.rowRect(0)
         #expect(m.rowIndex(at: CGPoint(x: rect.midX, y: rect.midY)) == nil)
         #expect(m.panelRect.maxY <= WidgetMetrics.canvas.height)
+        #expect(m.panelRect.height == WidgetMetrics.headerHeight + WidgetMetrics.maxBodyHeight + WidgetMetrics.panelBottomPadding)
+    }
+
+    // MARK: Windows
+
+    /// The tabs of one window sit together; a gap parts them from the next window. Windows with
+    /// one tab each keep the plain pitch.
+    @Test func lampsOfAWindowWithSeveralTabsArePartedFromTheOthers() {
+        let m = WidgetMetrics(groupSizes: [2, 1, 1])
+        #expect(m.sessionCount == 4)
+        #expect((0..<4).map(m.gapBefore) == [false, false, true, false])
+        #expect(m.columnRect.height == 4 * WidgetMetrics.lampPitch + WidgetMetrics.groupGap + 2 * WidgetMetrics.columnPadding)
+        #expect(m.lampCenter(1).y - m.lampCenter(2).y == WidgetMetrics.lampPitch + WidgetMetrics.groupGap)
+        #expect(m.lampCenter(2).y - m.lampCenter(3).y == WidgetMetrics.lampPitch)
+        for index in 0..<4 {
+            #expect(m.lampIndex(at: m.lampCenter(index)) == index)
+        }
+        let gap = CGPoint(x: m.columnRect.midX, y: m.lampCenter(1).y - WidgetMetrics.lampPitch / 2 - WidgetMetrics.groupGap / 2)
+        #expect(m.lampIndex(at: gap) == nil)
+    }
+
+    @Test func aWindowWithSeveralTabsGetsAHeaderInTheList() {
+        let m = WidgetMetrics(groupSizes: [1, 2])
+        #expect((0..<3).map(m.headerBefore) == [false, true, false])
+        #expect(m.panelRect.height == WidgetMetrics.headerHeight + 3 * WidgetMetrics.rowHeight + WidgetMetrics.groupHeaderHeight + WidgetMetrics.panelBottomPadding)
+        #expect(m.rowRect(0).minY - m.rowRect(1).maxY == WidgetMetrics.groupHeaderHeight)
+        #expect(m.rowRect(1).minY == m.rowRect(2).maxY)
+        for index in 0..<3 {
+            let rect = m.rowRect(index)
+            #expect(m.rowIndex(at: CGPoint(x: rect.midX, y: rect.midY)) == index)
+        }
+        let header = CGPoint(x: m.panelRect.midX, y: m.rowRect(1).maxY + WidgetMetrics.groupHeaderHeight / 2)
+        #expect(m.rowIndex(at: header) == nil)
+    }
+
+    @Test func oneTabPerWindowLooksLikeAPlainList() {
+        #expect(WidgetMetrics(groupSizes: [1, 1, 1]) == WidgetMetrics(sessionCount: 3))
+        #expect(WidgetMetrics(groupSizes: [1, 1, 1]).columnRect == WidgetMetrics(groupSizes: [3]).columnRect)
     }
 
     @Test func hoverAreaGrowsWhenExpanded() {

@@ -27,7 +27,7 @@ enum SessionOpener {
     }
 
     static func open(_ state: SessionState) {
-        let folder = URL(fileURLWithPath: state.cwd, isDirectory: true)
+        let folder = URL(fileURLWithPath: state.folder, isDirectory: true)
         let workspace = NSWorkspace.shared
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = true
@@ -57,7 +57,7 @@ enum SessionOpener {
     }
 
     static func showInFinder(_ state: SessionState) {
-        NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: state.cwd, isDirectory: true)])
+        NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: state.folder, isDirectory: true)])
     }
 
     nonisolated static func sessionURL(_ sessionId: String) -> URL? {

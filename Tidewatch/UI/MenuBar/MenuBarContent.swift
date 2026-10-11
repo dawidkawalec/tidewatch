@@ -24,6 +24,7 @@ struct MenuBarContent: View {
         Button("Check for Updates…") { state.updater.checkNow() }
             .disabled(!state.updater.isConfigured || !state.updater.canCheckNow)
         Divider()
+        Button("Restart Tidewatch") { AppRestarter.restart() }
         Button("Quit Tidewatch") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
     }

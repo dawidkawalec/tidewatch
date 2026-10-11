@@ -39,6 +39,7 @@ scripts/record-demo.sh <out>         # record the looping widget-demo video for 
 - The helper is the only writer of session files; it writes atomically under a file lock, never prints to stdout, never touches the network and always exits 0. It must never block or change Claude Code's behavior.
 - `HookInstaller` touches only Tidewatch's own entries in `~/.claude/settings.json` (identified by the helper path), always backs the file up first and refuses invalid JSON.
 - The app's only network access is Sparkle's daily update check (`kawalec.pl/tidewatch/updates/appcast.xml`); nothing about the user or sessions ever leaves the Mac. Releases are signed with the Sparkle key, Keychain account `tidewatch` (docs/release.md).
+- Claude Code's own files are read-only for Tidewatch: the registry `~/.claude/sessions/*.json` (never the `.key` files) and only the title lines at the end of a transcript. Tests and the design preview use `ClaudeSystem.none`.
 - The widget panel never activates the app or takes focus (`orderFrontRegardless()`, no `NSApp.activate`, no `makeKey`).
 - No ad-hoc colors, materials or `glassEffect` in views: use `UI/Glass` tokens and `widgetGlass`. Check UI with `scripts/snap.sh` against the mockups in `docs/design/`.
 - A change is done only when `make build` and `make test` pass. No new dependencies without a note in `docs/architecture.md`.

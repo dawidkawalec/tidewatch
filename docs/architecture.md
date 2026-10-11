@@ -6,9 +6,9 @@ Status: built (MVP, 2026-10-10), installed and accepted end to end against real 
 
 | Module | Where | Job |
 |---|---|---|
-| `TidewatchCore` | `Packages/TidewatchCore/` | Session model, hook event decoding, reducer `(SessionState?, HookEvent) -> SessionState`, `displayStatus` time rules, activity labels, ordering. Foundation only, fully unit-tested |
+| `TidewatchCore` | `Packages/TidewatchCore/` | Session model, hook event decoding, reducer `(SessionState?, HookEvent) -> SessionState`, `displayStatus` time rules, activity labels, ordering, window grouping and row names, Claude Code's registry and transcript title parsing (`ClaudeRegistry`), merge of both sources (`SessionMerge`). Foundation only, fully unit-tested |
 | `tidewatch-hook` | `TidewatchHook/` | Reads one hook event from stdin, reduces it into `sessions/<session_id>.json` under `flock`, writes tmp + rename, exits 0 |
-| App: sessions | `Tidewatch/Sessions/` | Folder watcher (DispatchSource, 100 ms debounce), `SessionStore` (`@Observable`), acknowledged sessions |
+| App: sessions | `Tidewatch/Sessions/` | Folder watcher (DispatchSource, 100 ms debounce), `SessionStore` (`@Observable`, sessions grouped by window), acknowledged sessions, `ClaudeSystem` (registry, process table, `TranscriptReader`) |
 | App: updates | `Tidewatch/App/AppUpdater*.swift` | Sparkle wrapper and the testable configuration rules (feed, key, public build) |
 | App: integration | `Tidewatch/Integration/` | `HookInstaller` (settings.json), `HelperInstaller` (stable helper copy), `SessionOpener` (VS Code / terminal), `SoundPlayer`, process liveness |
 | App: UI | `Tidewatch/UI/` | Glass tokens from Captylo, the widget `NSPanel`, lamp column, session panel, design preview (static targets and the scripted `widget-demo` cycle) |
@@ -21,6 +21,11 @@ Claude Code hook event (stdin JSON)
   -> ~/Library/Application Support/Tidewatch/bin/tidewatch-hook
   -> ~/Library/Application Support/Tidewatch/sessions/<id>.json
   -> folder watcher -> SessionStore -> lamp column / session panel, sounds
+~/.claude/sessions/<pid>.json (Claude Code's list of running processes, read every reload)
+  -> SessionMerge: adds open tabs without hook events, the window's folder as the name
+~/.claude/projects/<folder>/<id>.jsonl (only the last 256 KB, only the title lines)
+  -> conversation started? and its title
+parent pid of the claude process = the VS Code window (extension host) -> groups
 click on a row -> open folder in VS Code -> vscode://anthropic.claude-code/open?session=<id>
 ```
 
@@ -28,7 +33,9 @@ click on a row -> open folder in VS Code -> vscode://anthropic.claude-code/open?
 
 | Decision | Why |
 |---|---|
-| Hooks, not transcript parsing | Transcript JSONL is internal and unstable; only hooks give a reliable "needs approval" signal |
+| Hooks for status, not transcript parsing | Transcript JSONL is internal and unstable; only hooks give a reliable "needs approval" signal. The transcript is read only for the conversation's title and to tell an empty tab from a conversation |
+| Every open tab, grouped by VS Code window (owner's call, 2026-10-11) | Hooks alone missed tabs that fired no event since Tidewatch started, and a lamp took its name from the agent's latest `cd`. Claude Code's own registry (`~/.claude/sessions/<pid>.json`: session, start folder, busy/waiting/idle) lists every process; the process's parent is its window. Undocumented, so it is read tolerantly and a failure falls back to the hooks. Empty tabs stay hidden. A window with several tabs gets a header and a gap in the column; one tab per window looks like before |
+| Restart from the widget and the menu bar | A shell waits for the old process to quit, then `open`s the bundle again; no helper app needed |
 | One state file per session (not a socket) | State survives app restarts, the app can be off, easy to inspect and debug |
 | Synchronous hooks with a 5 s timeout | Keeps event order and `SessionEnd`; the native helper costs a few ms |
 | Stable helper copy in Application Support | Moving or updating the app never breaks the command path stored in `settings.json` |

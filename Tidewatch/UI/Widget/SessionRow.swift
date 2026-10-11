@@ -46,6 +46,8 @@ struct SessionRow: View {
         .buttonStyle(.plain)
         .contextMenu {
             Button("Show in Finder") { actions.showInFinder(session) }
+            Divider()
+            WidgetMenu(actions: actions)
         }
         .accessibilityLabel("\(session.name), \(statusLine)")
     }

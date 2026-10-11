@@ -28,17 +28,62 @@ public enum DisplayRules {
         now.timeIntervalSince(state.lastEvent) > abandonedAfter
     }
 
-    /// Whether a session gets a lamp: someone works in it (not a spare process the VS Code extension
-    /// started) and it runs in a project, not inside Claude Code's own `~/.claude` folder.
-    public static func isShown(_ state: SessionState, home: String) -> Bool {
-        guard state.hasConversation else { return false }
+    /// Whether a session gets a lamp: someone works in it (not an empty Claude tab) and it belongs
+    /// to a project, not to Claude Code's own `~/.claude` folder. When the hooks never saw the
+    /// session start (an older file, or a session known only from Claude Code's registry), its
+    /// transcript decides: Claude Code writes one only once the conversation begins.
+    public static func isShown(_ state: SessionState, home: String, hasTranscript: Bool = true) -> Bool {
+        guard state.startedConversation ?? hasTranscript else { return false }
         let claudeFolder = (home.hasSuffix("/") ? String(home.dropLast()) : home) + "/.claude"
-        return state.cwd != claudeFolder && !state.cwd.hasPrefix(claudeFolder + "/")
+        return state.folder != claudeFolder && !state.folder.hasPrefix(claudeFolder + "/")
     }
 
     /// Stable order: lamps never jump when a status changes.
     public static func ordered(_ sessions: [SessionState]) -> [SessionState] {
         sessions.sorted { ($0.firstSeen, $0.sessionId) < ($1.firstSeen, $1.sessionId) }
+    }
+
+    /// Sessions grouped by window (`window` returns a key per session), each group in stable order
+    /// and placed by its oldest session.
+    public static func grouped(_ sessions: [SessionState], window: (SessionState) -> String) -> [[SessionState]] {
+        var groups: [String: [SessionState]] = [:]
+        var keys: [String] = []
+        for session in ordered(sessions) {
+            let key = window(session)
+            if groups[key] == nil { keys.append(key) }
+            groups[key, default: []].append(session)
+        }
+        return keys.compactMap { groups[$0] }
+    }
+
+    /// Row titles of one window's sessions, keyed by session id: the folder name for a window with
+    /// one session; with several, each conversation's title, or "folder #n" while it has none.
+    public static func rowNames(in group: [SessionState]) -> [String: String] {
+        guard group.count > 1 else {
+            return Dictionary(uniqueKeysWithValues: group.map { ($0.sessionId, $0.project) })
+        }
+        var names: [String: String] = [:]
+        for (index, session) in group.enumerated() {
+            names[session.sessionId] = session.title ?? "\(session.project) #\(index + 1)"
+        }
+        return names
+    }
+
+    /// Row titles of all groups, keyed by session id. A name that still repeats (two terminal
+    /// sessions in one folder are two windows) gets "#n" in display order.
+    public static func names(for groups: [[SessionState]]) -> [String: String] {
+        var names: [String: String] = [:]
+        for group in groups { names.merge(rowNames(in: group)) { first, _ in first } }
+        let order = groups.flatMap { $0.map(\.sessionId) }
+        var counts: [String: Int] = [:]
+        for id in order { counts[names[id] ?? "", default: 0] += 1 }
+        var seen: [String: Int] = [:]
+        for id in order {
+            guard let name = names[id], counts[name, default: 0] > 1 else { continue }
+            seen[name, default: 0] += 1
+            names[id] = "\(name) #\(seen[name, default: 1])"
+        }
+        return names
     }
 
     public static func statusLine(_ state: SessionState, status: SessionStatus) -> String {
@@ -81,28 +126,5 @@ public enum DisplayRules {
         if seconds < 3600 { return "\(Int(seconds / 60))m" }
         if seconds < 86_400 { return "\(Int(seconds / 3600))h" }
         return "\(Int(seconds / 86_400))d"
-    }
-
-    /// Row titles keyed by session id: the folder name, plus the title (or "#n") when several
-    /// sessions share a folder.
-    public static func names(for sessions: [SessionState]) -> [String: String] {
-        let sorted = ordered(sessions)
-        var counts: [String: Int] = [:]
-        for session in sorted { counts[session.project, default: 0] += 1 }
-        var seen: [String: Int] = [:]
-        var names: [String: String] = [:]
-        for session in sorted {
-            guard counts[session.project, default: 0] > 1 else {
-                names[session.id] = session.project
-                continue
-            }
-            seen[session.project, default: 0] += 1
-            if let title = session.title {
-                names[session.id] = "\(session.project) · \(title)"
-            } else {
-                names[session.id] = "\(session.project) #\(seen[session.project, default: 1])"
-            }
-        }
-        return names
     }
 }

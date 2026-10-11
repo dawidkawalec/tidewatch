@@ -7,7 +7,10 @@ public struct SessionState: Codable, Sendable, Equatable, Identifiable {
 
     public var schema: Int
     public var sessionId: String
+    /// Where the last event ran; follows the agent's `cd`.
     public var cwd: String
+    /// Where the session started (the VS Code window's folder). nil in files from before 0.4.0.
+    public var root: String?
     public var title: String?
     public var host: SessionHost
     /// `TERM_PROGRAM` of a terminal session ("iTerm.app", "Apple_Terminal", ...).
@@ -30,23 +33,26 @@ public struct SessionState: Codable, Sendable, Equatable, Identifiable {
     /// Changes on every event.
     public var lastEvent: Date
     /// False from a fresh SessionStart until the first prompt or tool call: the VS Code extension
-    /// starts spare processes that never get one. nil (files from before 0.3.0) counts as true.
+    /// opens empty tabs that may never get one. nil (files from before 0.3.0, sessions known only
+    /// from Claude Code's registry) is unknown: `DisplayRules.isShown` asks the transcript.
     public var startedConversation: Bool?
 
     public var id: String { sessionId }
 
-    public var hasConversation: Bool { startedConversation ?? true }
+    /// The session's project folder: it names the lamp and is what a click opens.
+    public var folder: String { root ?? cwd }
 
-    /// The project folder's name ("captylo-app"), the row title.
+    /// The project folder's name ("captylo-app").
     public var project: String {
-        let name = URL(fileURLWithPath: cwd).lastPathComponent
-        return name.isEmpty ? cwd : name
+        let name = URL(fileURLWithPath: folder).lastPathComponent
+        return name.isEmpty ? folder : name
     }
 
     public init(sessionId: String, cwd: String, host: SessionHost, terminalApp: String?, pid: Int32?, now: Date) {
         schema = Self.currentSchema
         self.sessionId = sessionId
         self.cwd = cwd
+        root = cwd.isEmpty ? nil : cwd
         title = nil
         self.host = host
         self.terminalApp = terminalApp

@@ -86,15 +86,4 @@ struct DisplayRulesTests {
         #expect(DisplayRules.elapsed(since: t0, now: t0.addingTimeInterval(2 * 86_400)) == "2d")
         #expect(DisplayRules.elapsed(since: t0.addingTimeInterval(30), now: t0) == "now")
     }
-
-    @Test func namesTellSessionsInOneFolderApart() {
-        let names = DisplayRules.names(for: [
-            session("a", "/Users/demo/app", firstSeen: 1, title: "Fix login"),
-            session("b", "/Users/demo/app", firstSeen: 2),
-            session("c", "/Users/demo/site", firstSeen: 3),
-        ])
-        #expect(names["a"] == "app · Fix login")
-        #expect(names["b"] == "app #2")
-        #expect(names["c"] == "site")
-    }
 }

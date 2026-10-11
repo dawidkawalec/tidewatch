@@ -39,38 +39,38 @@ struct ConversationTests {
     @Test func freshStartHasNoConversation() throws {
         for source in ["startup", "clear", nil] {
             let state = try #require(reduce([start(source)]))
-            #expect(!state.hasConversation, "source \(source ?? "nil")")
+            #expect(state.startedConversation == false, "source \(source ?? "nil")")
         }
     }
 
     @Test func resumedOrCompactedStartHasAConversation() throws {
-        #expect(try #require(reduce([start("resume")])).hasConversation)
-        #expect(try #require(reduce([start("compact")])).hasConversation)
+        #expect(try #require(reduce([start("resume")])).startedConversation == true)
+        #expect(try #require(reduce([start("compact")])).startedConversation == true)
     }
 
     @Test func thePromptStartsTheConversation() throws {
         let state = try #require(reduce([start("startup"), event(.userPromptSubmit)]))
-        #expect(state.hasConversation)
+        #expect(state.startedConversation == true)
     }
 
     /// A session already running when Tidewatch was connected is first seen mid-turn.
     @Test func aSessionFirstSeenMidTurnHasAConversation() throws {
-        #expect(try #require(reduce([event(.preToolUse)])).hasConversation)
-        #expect(try #require(reduce([event(.stop)])).hasConversation)
+        #expect(try #require(reduce([event(.preToolUse)])).startedConversation == true)
+        #expect(try #require(reduce([event(.stop)])).startedConversation == true)
     }
 
     @Test func aLaterStartupKeepsTheConversation() throws {
         let state = try #require(reduce([start("startup"), event(.userPromptSubmit), start("startup")]))
-        #expect(state.hasConversation)
+        #expect(state.startedConversation == true)
     }
 
-    /// State files written before this field existed belong to real sessions.
-    @Test func olderStateFilesCountAsConversations() throws {
+    /// State files written before this field existed leave it unknown (the transcript decides).
+    @Test func olderStateFilesLeaveTheConversationUnknown() throws {
         var state = SessionState(sessionId: "s-1", cwd: "/Users/demo/app", host: .vscode, terminalApp: nil, pid: 1, now: t0)
         state.startedConversation = nil
         let data = try SessionCoding.encoder().encode(state)
         #expect(!String(decoding: data, as: UTF8.self).contains("startedConversation"))
-        #expect(try SessionCoding.decoder().decode(SessionState.self, from: data).hasConversation)
+        #expect(try SessionCoding.decoder().decode(SessionState.self, from: data).startedConversation == nil)
     }
 
     @Test func onlySessionsWithAConversationOutsideClaudesFolderAreShown() {
@@ -83,11 +83,11 @@ struct ConversationTests {
 
         state.startedConversation = true
         for cwd in ["/Users/demo/.claude", "/Users/demo/.claude/", "/Users/demo/.claude/projects/-Users-demo-app"] {
-            state.cwd = cwd
+            state.root = cwd
             #expect(!DisplayRules.isShown(state, home: home), "\(cwd)")
         }
         for cwd in ["/Users/demo/.claude-tools", "/Users/demo/projects/.claude-app", "/Users/other/.claude/x"] {
-            state.cwd = cwd
+            state.root = cwd
             #expect(DisplayRules.isShown(state, home: home), "\(cwd)")
         }
     }

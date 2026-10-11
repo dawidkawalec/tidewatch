@@ -10,6 +10,14 @@ struct DisplayedSession: Identifiable, Equatable, Sendable {
     var id: String { state.sessionId }
 }
 
+/// One VS Code window (or one terminal session) and its sessions, in stable order.
+struct SessionGroup: Identifiable, Equatable, Sendable {
+    let id: String
+    /// The window's folder name.
+    let name: String
+    let sessions: [DisplayedSession]
+}
+
 /// A shown status that changed between two reloads (sounds).
 struct SessionTransition: Equatable, Sendable {
     let sessionId: String
@@ -17,14 +25,17 @@ struct SessionTransition: Equatable, Sendable {
     let to: SessionStatus
 }
 
-/// The sessions folder as the widget sees it: loads the files, drops ended sessions, applies the
-/// display rules and reports status changes. Reloads on folder changes and every 15 s (time rules,
-/// liveness).
+/// The sessions as the widget sees them: loads the hook files, drops ended sessions, adds the open
+/// sessions Claude Code lists that fired no hook yet, applies the display rules, groups them by
+/// window and reports status changes. Reloads on folder changes and every 15 s (time rules,
+/// liveness, the registry).
 @MainActor
 @Observable
 final class SessionStore {
     static let refreshInterval: Duration = .seconds(15)
 
+    private(set) var groups: [SessionGroup] = []
+    /// All sessions in widget order (lamp and row indexes).
     private(set) var sessions: [DisplayedSession] = []
     @ObservationIgnored var onTransition: ((SessionTransition) -> Void)?
     @ObservationIgnored let fileStore: SessionFileStore
@@ -33,6 +44,7 @@ final class SessionStore {
     @ObservationIgnored private let clock: @Sendable () -> Date
     /// The user's home folder, for `DisplayRules.isShown` (Claude Code's own `~/.claude`).
     @ObservationIgnored private let home: String
+    @ObservationIgnored private let system: ClaudeSystem
     @ObservationIgnored private var watcher: SessionFolderWatcher?
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private var lastStatuses: [String: SessionStatus] = [:]
@@ -43,13 +55,15 @@ final class SessionStore {
         acknowledged: AcknowledgedStore,
         isAlive: @escaping @Sendable (Int32) -> Bool = ProcessLiveness.isAlive,
         clock: @escaping @Sendable () -> Date = { Date() },
-        home: String = NSHomeDirectory()
+        home: String = NSHomeDirectory(),
+        system: ClaudeSystem = .none
     ) {
         self.fileStore = fileStore
         self.acknowledged = acknowledged
         self.isAlive = isAlive
         self.clock = clock
         self.home = home
+        self.system = system
     }
 
     func start() {
@@ -68,7 +82,7 @@ final class SessionStore {
 
     func reload() {
         let now = clock()
-        var live: [SessionState] = []
+        var hooks: [SessionState] = []
         for state in fileStore.loadAll() {
             // A live process keeps its session (an idle tab overnight stays put); the 6 h rule is
             // only the fallback for sessions without a pid (spec 4.2).
@@ -79,20 +93,39 @@ final class SessionStore {
                 Log.sessions.info("dropped an ended session")
                 continue
             }
-            // Spare processes and Claude Code's helpers keep their files but get no lamp.
-            guard DisplayRules.isShown(state, home: home) else { continue }
+            hooks.append(state)
+        }
+
+        var live: [SessionState] = []
+        for var state in SessionMerge.merge(hooks: hooks, processes: system.processes()) {
+            let transcript = system.transcript(state)
+            // Empty tabs and Claude Code's helpers keep their files but get no lamp.
+            guard DisplayRules.isShown(state, home: home, hasTranscript: transcript.exists) else { continue }
+            if let title = transcript.title { state.title = title }
             live.append(state)
         }
 
-        let ordered = DisplayRules.ordered(live)
-        let names = DisplayRules.names(for: ordered)
-        let displayed = ordered.map { state in
-            DisplayedSession(
-                state: state,
-                status: DisplayRules.displayStatus(state, now: now, acknowledgedAt: acknowledged.acknowledgedAt(state.sessionId)),
-                name: names[state.sessionId] ?? state.project
+        // A VS Code tab's process is a child of its window's extension host.
+        let parent = system.parent
+        func windowKey(_ state: SessionState) -> String {
+            state.pid.flatMap(parent).map { "window-\($0)" } ?? "session-\(state.sessionId)"
+        }
+        let grouped = DisplayRules.grouped(live, window: windowKey)
+        let names = DisplayRules.names(for: grouped)
+        let nextGroups = grouped.map { members in
+            SessionGroup(
+                id: members.first.map(windowKey) ?? "",
+                name: members.first?.project ?? "",
+                sessions: members.map { state in
+                    DisplayedSession(
+                        state: state,
+                        status: DisplayRules.displayStatus(state, now: now, acknowledgedAt: acknowledged.acknowledgedAt(state.sessionId)),
+                        name: names[state.sessionId] ?? state.project
+                    )
+                }
             )
         }
+        let displayed = nextGroups.flatMap(\.sessions)
 
         var statuses: [String: SessionStatus] = [:]
         for session in displayed {
@@ -104,6 +137,7 @@ final class SessionStore {
         lastStatuses = statuses
         hasLoaded = true
         acknowledged.prune(keeping: Set(statuses.keys))
+        if nextGroups != groups { groups = nextGroups }
         if displayed != sessions { sessions = displayed }
     }
 
