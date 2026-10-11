@@ -22,7 +22,7 @@ A tiny native macOS widget that shows the state of every running Claude Code ses
 
 | Topic | Decision |
 |---|---|
-| Repo | Separate private GitHub repo `session-widget`; app name **Tidewatch** |
+| Repo | Separate GitHub repo, now public as `dawidkawalec/tidewatch` (MIT); app name **Tidewatch** |
 | Platform | Native: Swift 6, SwiftUI + AppKit, XcodeGen, macOS 14.4+, arm64 |
 | Design | Captylo's Dusk Glass (tokens and glass surface copied from the Captylo repo, owner is the author) |
 | Agents | Claude Code only (VS Code extension first, CLI works too) |

@@ -84,7 +84,7 @@ deploy-site:
 	@[ -n "$(VERSION)" ] || { echo "usage: make deploy-site VERSION=x.y.z"; exit 2; }
 	scripts/site.sh deploy $(VERSION)
 
-# Public download page + GitHub release of dist/<version>/Tidewatch-<version>.dmg on the private repo
+# Public download page + GitHub release of dist/<version>/Tidewatch-<version>.dmg on github.com/dawidkawalec/tidewatch
 # (owner's go-ahead first).
 publish:
 	@[ -n "$(VERSION)" ] || { echo "usage: make publish VERSION=x.y.z"; exit 2; }
