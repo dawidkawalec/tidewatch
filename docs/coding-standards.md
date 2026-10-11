@@ -1,6 +1,6 @@
 # Coding standards
 
-Taken from Captylo (`<captylo-repo>/docs/coding-standards.md`) and trimmed to what Tidewatch needs.
+Taken from Captylo's coding standards and trimmed to what Tidewatch needs.
 
 ## Swift
 

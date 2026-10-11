@@ -44,3 +44,7 @@ scripts/snap.sh widget-expanded out.png   # screenshot a design preview with inv
 ```
 
 See [AGENTS.md](AGENTS.md) and [docs/](docs/) for the architecture, the spec and the coding standards.
+
+## License
+
+MIT, see [LICENSE](LICENSE). The bundled Inter and Manrope fonts are under the SIL Open Font License (`Tidewatch/Resources/Fonts/OFL-*.txt`); Sparkle is MIT. Tidewatch is not affiliated with Anthropic.

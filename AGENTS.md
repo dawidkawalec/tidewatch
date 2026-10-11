@@ -2,7 +2,7 @@
 
 Native macOS widget: a column of glass status lamps on the right screen edge that shows every running Claude Code session (working, needs approval, awaiting review, idle) and opens the right VS Code window on click.
 
-**Identity**: bundle `pl.craftweb.tidewatch`, product `Tidewatch.app`, data in `~/Library/Application Support/Tidewatch/`, log subsystem `pl.craftweb.tidewatch`, macOS 14.4+, arm64 only. Private repo `dawidkawalec/session-widget`, Plane project `TIDEWATCH`. Design language copied from Captylo (`<captylo-repo>`).
+**Identity**: bundle `pl.craftweb.tidewatch`, product `Tidewatch.app`, data in `~/Library/Application Support/Tidewatch/`, log subsystem `pl.craftweb.tidewatch`, macOS 14.4+, arm64 only. Private repo `dawidkawalec/session-widget`, Plane project `TIDEWATCH`. Design language copied from Captylo, the owner's dictation app.
 
 ## Stack
 

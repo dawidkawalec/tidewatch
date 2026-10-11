@@ -169,16 +169,16 @@ struct SessionStoreTests {
     @Test func showsEveryOpenTabGroupedByWindow() throws {
         let store = makeStore(
             processes: [
-                process(10, "zorko", cwd: "/w/atlas", started: 1, status: "waiting"),
+                process(10, "checkout", cwd: "/w/atlas", started: 1, status: "waiting"),
                 process(11, "onboarding", cwd: "/w/atlas", started: 4),
                 process(20, "skills", cwd: "/w/promo-kit", started: 2, status: "busy"),
             ],
             windows: [10: 900, 11: 900, 20: 901],
-            transcripts: ["zorko": "Checkout redesign", "onboarding": "Onboarding review", "skills": "Skills audit"]
+            transcripts: ["checkout": "Checkout redesign", "onboarding": "Onboarding review", "skills": "Skills audit"]
         )
         store.reload()
         #expect(store.groups.map(\.name) == ["atlas", "promo-kit"])
-        #expect(store.groups.map { $0.sessions.map(\.id) } == [["zorko", "onboarding"], ["skills"]])
+        #expect(store.groups.map { $0.sessions.map(\.id) } == [["checkout", "onboarding"], ["skills"]])
         #expect(store.sessions.map(\.name) == ["Checkout redesign", "Onboarding review", "Skills audit"])
         #expect(store.sessions.map(\.status) == [.needsApproval, .idle, .working])
     }

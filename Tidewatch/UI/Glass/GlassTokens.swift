@@ -1,9 +1,9 @@
 import SwiftUI
 
-// Glass tokens: the type and radii of Captylo's Dusk Glass (<captylo-repo>,
-// docs/design/dusk-glass.md) on native Liquid Glass. The widget follows the system appearance:
-// light glass with dark type in light mode, dark glass with light type in dark mode, like
-// Control Center. Views never hard-code radii, opacities, colours or fonts.
+// Glass tokens: the type and radii of Captylo's Dusk Glass on a light, blurred glass
+// (`WidgetGlass`). The widget follows the system appearance unless the user picks one: light
+// glass with dark type, dark glass with light type. Views never hard-code radii, opacities,
+// colours or fonts.
 
 enum GlassTokens {
     enum Radius {
