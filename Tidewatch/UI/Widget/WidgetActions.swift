@@ -4,8 +4,9 @@ struct WidgetActions {
     var showInFinder: @MainActor (DisplayedSession) -> Void
     var connect: @MainActor () -> Void
     var restart: @MainActor () -> Void
+    var openSettings: @MainActor () -> Void
 
     @MainActor static var preview: WidgetActions {
-        WidgetActions(open: { _ in }, showInFinder: { _ in }, connect: {}, restart: {})
+        WidgetActions(open: { _ in }, showInFinder: { _ in }, connect: {}, restart: {}, openSettings: {})
     }
 }

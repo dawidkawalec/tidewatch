@@ -14,6 +14,7 @@ final class AppState {
     private(set) var hookError: String?
     private(set) var launchAtLogin = LaunchAtLogin.isEnabled
     @ObservationIgnored private var widget: WidgetPanelController?
+    @ObservationIgnored private var settingsWindow: SettingsWindowController?
     @ObservationIgnored private let sounds = SoundPlayer()
     @ObservationIgnored private let settingsURL = HookInstaller.defaultSettingsURL()
     @ObservationIgnored private let helperURL = DataPaths.helper()
@@ -76,8 +77,23 @@ final class AppState {
             },
             restart: {
                 AppRestarter.restart()
+            },
+            openSettings: { [weak self] in
+                self?.openSettings()
             }
         )
+    }
+
+    // MARK: Settings
+
+    func openSettings() {
+        let controller = settingsWindow ?? SettingsWindowController(
+            settings: settings,
+            reviewFadeChanged: { [weak self] in self?.store.reload() },
+            onVisibilityChange: { [weak self] visible in self?.widget?.setPinnedOpen(visible) }
+        )
+        settingsWindow = controller
+        controller.show()
     }
 
     // MARK: Hooks

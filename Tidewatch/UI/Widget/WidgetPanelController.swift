@@ -36,7 +36,7 @@ final class WidgetPanelController {
         watchesPointer = watchPointer
         reposition()
         panel.orderFrontRegardless()
-        applyBlur()
+        applyGlass()
         screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.reposition() }
         }
@@ -44,15 +44,23 @@ final class WidgetPanelController {
         Log.ui.debug("widget shown")
     }
 
-    /// The window's blur radius from the settings, again whenever the user picks another one.
-    private func applyBlur() {
+    /// The window's blur radius and appearance from the settings, again whenever they change.
+    private func applyGlass() {
         let reduce = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
-        let radius = withObservationTracking {
-            settings.glassBlur.radius
+        let (radius, appearance) = withObservationTracking {
+            (settings.glassBlur, settings.glassAppearance)
         } onChange: { [weak self] in
-            Task { @MainActor in self?.applyBlur() }
+            Task { @MainActor in self?.applyGlass() }
         }
-        WindowBlur.set(reduce ? 0 : radius, on: panel)
+        panel.appearance = appearance.nsAppearance
+        WindowBlur.set(reduce ? 0 : Int(radius.rounded()), on: panel)
+    }
+
+    /// While the settings window is open the panel stays expanded, so every change shows.
+    func setPinnedOpen(_ pinned: Bool) {
+        guard watchesPointer else { return }
+        model.isExpansionPinned = pinned
+        if pinned { setExpanded(true) } else { evaluatePointer() }
     }
 
     /// Closes the panel at once (after a click on a row).

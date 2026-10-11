@@ -7,7 +7,7 @@ import CoreGraphics
 /// from its neighbours by a gap in the column and gets a header in the list; windows with one tab
 /// each look like a plain list.
 struct WidgetMetrics: Equatable, Sendable {
-    static let canvas = CGSize(width: 352, height: 600)
+    static let canvas = CGSize(width: 402, height: 600)
     static let edgeGap: CGFloat = 8
     static let columnWidth: CGFloat = 36
     static let columnPadding: CGFloat = 9
@@ -17,7 +17,7 @@ struct WidgetMetrics: Equatable, Sendable {
     static let chevronHeight: CGFloat = 16
     static let maxLamps = 10
     static let panelGap: CGFloat = 16
-    static let panelWidth: CGFloat = 280
+    static let panelWidth: CGFloat = 330
     static let headerHeight: CGFloat = 52
     static let groupHeaderHeight: CGFloat = 26
     static let rowHeight: CGFloat = 50

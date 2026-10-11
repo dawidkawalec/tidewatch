@@ -22,14 +22,17 @@ struct SessionRow: View {
                         .foregroundStyle(GlassColor.textPrimary)
                         .lineLimit(1)
                     HStack(spacing: 0) {
+                        // What happens matters more than the project: the status takes its room
+                        // first, the project gives way and keeps at least its beginning.
                         Text(statusLine)
                             .foregroundStyle(StatusPalette.text(session.status))
                             .truncationMode(.tail)
-                        // The project stays readable; a long status gives way first.
+                            .layoutPriority(1)
                         if let project {
                             Text(" · \(project)")
                                 .foregroundStyle(GlassColor.textSecondary)
-                                .layoutPriority(1)
+                                .truncationMode(.tail)
+                                .frame(minWidth: 44, alignment: .leading)
                         }
                     }
                     .font(GlassFont.rowSubtitle)

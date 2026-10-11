@@ -44,7 +44,23 @@ struct WidgetGlass<S: InsettableShape>: ViewModifier {
     }
 }
 
+/// "Text contrast": a soft halo in the opposite tone under the text, so it reads over any
+/// background behind the light glass.
+@MainActor
+struct TextHalo: ViewModifier {
+    let enabled: Bool
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content.shadow(color: enabled ? (colorScheme == .dark ? Color.black : Color.white).opacity(GlassTokens.Liquid.haloOpacity) : .clear, radius: GlassTokens.Liquid.haloRadius)
+    }
+}
+
 extension View {
+    func textHalo(_ enabled: Bool) -> some View {
+        modifier(TextHalo(enabled: enabled))
+    }
+
     func widgetGlass<S: InsettableShape>(in shape: S, tint: Double) -> some View {
         modifier(WidgetGlass(shape: shape, tint: tint))
     }

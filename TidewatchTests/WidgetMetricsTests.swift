@@ -96,6 +96,12 @@ struct WidgetMetricsTests {
         #expect(m.hoverRect(expanded: true).contains(CGPoint(x: m.panelRect.maxX + WidgetMetrics.panelGap / 2, y: m.columnRect.midY)))
     }
 
+    /// The owner asked for a panel 50 pt wider (330); it must still fit the canvas.
+    @Test func theWiderPanelFitsTheCanvas() {
+        #expect(WidgetMetrics.panelWidth == 330)
+        #expect(WidgetMetrics(sessionCount: 3).panelRect.minX >= 0)
+    }
+
     @Test func canvasIsGluedToTheRightOfTheVisibleFrame() {
         let frame = CGRect(x: 0, y: 0, width: 1728, height: 1080)
         let origin = WidgetMetrics.canvasOrigin(in: frame)

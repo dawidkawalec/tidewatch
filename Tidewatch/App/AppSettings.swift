@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 
@@ -7,41 +8,37 @@ final class AppSettings {
     private enum Keys {
         static let sounds = "sounds.enabled"
         static let connected = "hooks.connected"
-        static let blur = "glass.blur"
-        static let tint = "glass.tint"
+        static let blur = "glass.blurRadius"
+        static let tint = "glass.tintOpacity"
+        static let appearance = "glass.appearance"
+        static let contrast = "glass.textContrast"
         static let reviewFade = "review.fade"
     }
 
-    /// How much the glass blurs what is behind it.
-    enum GlassBlur: String, CaseIterable, Identifiable {
-        case light, medium, strong
-        var id: String { rawValue }
-        var radius: Int {
-            switch self {
-            case .light: return 4
-            case .medium: return 8
-            case .strong: return 14
-            }
-        }
-        var label: String { rawValue.capitalized }
-    }
+    /// Blur behind the glass, in points (`WindowBlur`).
+    static let blurRange: ClosedRange<Double> = 0...20
+    /// Opacity of the glass's tint (white in light, black in dark).
+    static let tintRange: ClosedRange<Double> = 0...0.6
+    static let defaultBlur: Double = 8
+    static let defaultTint: Double = 0.25
 
-    /// How dense the glass's tint is (white in light mode, black in dark mode).
-    enum GlassTint: String, CaseIterable, Identifiable {
-        case lighter, standard, darker
+    /// Light or dark glass; `system` follows macOS. Dark glass reads well over dark pages on a light
+    /// system, and the other way round.
+    enum GlassAppearance: String, CaseIterable, Identifiable {
+        case system, light, dark
         var id: String { rawValue }
-        var fill: Double {
-            switch self {
-            case .lighter: return 0.15
-            case .standard: return 0.25
-            case .darker: return 0.38
-            }
-        }
         var label: String {
             switch self {
-            case .lighter: return "Lighter"
-            case .standard: return "Default"
-            case .darker: return "Denser"
+            case .system: return "System"
+            case .light: return "Light"
+            case .dark: return "Dark"
+            }
+        }
+        var nsAppearance: NSAppearance? {
+            switch self {
+            case .system: return nil
+            case .light: return NSAppearance(named: .aqua)
+            case .dark: return NSAppearance(named: .darkAqua)
             }
         }
     }
@@ -60,9 +57,9 @@ final class AppSettings {
         }
         var label: String {
             switch self {
-            case .fiveMinutes: return "After 5 Minutes"
-            case .tenMinutes: return "After 10 Minutes"
-            case .thirtyMinutes: return "After 30 Minutes"
+            case .fiveMinutes: return "After 5 minutes"
+            case .tenMinutes: return "After 10 minutes"
+            case .thirtyMinutes: return "After 30 minutes"
             case .never: return "Never (until opened)"
             }
         }
@@ -79,12 +76,29 @@ final class AppSettings {
         didSet { defaults.set(hooksConnected, forKey: Keys.connected) }
     }
 
-    var glassBlur: GlassBlur {
-        didSet { defaults.set(glassBlur.rawValue, forKey: Keys.blur) }
+    var glassBlur: Double {
+        didSet {
+            let clamped = glassBlur.clamped(to: Self.blurRange)
+            if clamped != glassBlur { glassBlur = clamped; return }
+            defaults.set(glassBlur, forKey: Keys.blur)
+        }
     }
 
-    var glassTint: GlassTint {
-        didSet { defaults.set(glassTint.rawValue, forKey: Keys.tint) }
+    var glassTint: Double {
+        didSet {
+            let clamped = glassTint.clamped(to: Self.tintRange)
+            if clamped != glassTint { glassTint = clamped; return }
+            defaults.set(glassTint, forKey: Keys.tint)
+        }
+    }
+
+    var glassAppearance: GlassAppearance {
+        didSet { defaults.set(glassAppearance.rawValue, forKey: Keys.appearance) }
+    }
+
+    /// A soft halo under the widget's text, so it reads over any background.
+    var textContrast: Bool {
+        didSet { defaults.set(textContrast, forKey: Keys.contrast) }
     }
 
     var reviewFade: ReviewFade {
@@ -95,8 +109,24 @@ final class AppSettings {
         self.defaults = defaults
         soundsEnabled = defaults.object(forKey: Keys.sounds) as? Bool ?? true
         hooksConnected = defaults.bool(forKey: Keys.connected)
-        glassBlur = defaults.string(forKey: Keys.blur).flatMap(GlassBlur.init(rawValue:)) ?? .medium
-        glassTint = defaults.string(forKey: Keys.tint).flatMap(GlassTint.init(rawValue:)) ?? .standard
+        glassBlur = (defaults.object(forKey: Keys.blur) as? Double ?? Self.defaultBlur).clamped(to: Self.blurRange)
+        glassTint = (defaults.object(forKey: Keys.tint) as? Double ?? Self.defaultTint).clamped(to: Self.tintRange)
+        glassAppearance = defaults.string(forKey: Keys.appearance).flatMap(GlassAppearance.init(rawValue:)) ?? .system
+        textContrast = defaults.object(forKey: Keys.contrast) as? Bool ?? true
         reviewFade = defaults.string(forKey: Keys.reviewFade).flatMap(ReviewFade.init(rawValue:)) ?? .tenMinutes
+    }
+
+    /// "Reset to Defaults" in the settings window (the glass only).
+    func resetGlass() {
+        glassBlur = Self.defaultBlur
+        glassTint = Self.defaultTint
+        glassAppearance = .system
+        textContrast = true
+    }
+}
+
+private extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double {
+        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
     }
 }

@@ -19,22 +19,38 @@ struct AppSettingsTests {
     @Test func glassAndReviewFadeDefaultAndPersist() {
         let defaults = UserDefaults(suiteName: "tw-settings-\(UUID().uuidString)")!
         let settings = AppSettings(defaults: defaults)
-        #expect(settings.glassBlur == .medium)
-        #expect(settings.glassTint == .standard)
+        #expect(settings.glassBlur == 8)
+        #expect(settings.glassTint == 0.25)
+        #expect(settings.glassAppearance == .system)
+        #expect(settings.textContrast)
         #expect(settings.reviewFade == .tenMinutes)
-        settings.glassBlur = .strong
-        settings.glassTint = .darker
+        settings.glassBlur = 13
+        settings.glassTint = 0.4
+        settings.glassAppearance = .dark
+        settings.textContrast = false
         settings.reviewFade = .never
         let reloaded = AppSettings(defaults: defaults)
-        #expect(reloaded.glassBlur == .strong)
-        #expect(reloaded.glassTint == .darker)
+        #expect(reloaded.glassBlur == 13)
+        #expect(reloaded.glassTint == 0.4)
+        #expect(reloaded.glassAppearance == .dark)
+        #expect(!reloaded.textContrast)
         #expect(reloaded.reviewFade == .never)
     }
 
-    @Test func choicesMapToValues() {
-        #expect(AppSettings.GlassBlur.allCases.map(\.radius) == [4, 8, 14])
-        #expect(AppSettings.GlassTint.lighter.fill < AppSettings.GlassTint.standard.fill)
-        #expect(AppSettings.GlassTint.standard.fill < AppSettings.GlassTint.darker.fill)
+    @Test func glassValuesStayInTheirRanges() {
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "tw-settings-\(UUID().uuidString)")!)
+        settings.glassBlur = 99
+        settings.glassTint = -1
+        #expect(settings.glassBlur == AppSettings.blurRange.upperBound)
+        #expect(settings.glassTint == AppSettings.tintRange.lowerBound)
+        settings.resetGlass()
+        #expect(settings.glassBlur == 8)
+        #expect(settings.glassTint == 0.25)
+        #expect(settings.glassAppearance == .system)
+        #expect(settings.textContrast)
+    }
+
+    @Test func reviewFadeChoicesMapToSeconds() {
         #expect(AppSettings.ReviewFade.allCases.map(\.seconds) == [300, 600, 1800, nil])
     }
 }

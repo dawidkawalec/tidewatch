@@ -43,6 +43,7 @@ struct WidgetMenu: View {
     let actions: WidgetActions
 
     var body: some View {
+        Button("Settings…") { actions.openSettings() }
         Button("Restart Tidewatch") { actions.restart() }
         Button("Quit Tidewatch") { NSApp.terminate(nil) }
     }

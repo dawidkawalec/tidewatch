@@ -55,6 +55,18 @@ struct SessionPanelView: View {
                 .font(GlassFont.sectionTitle)
                 .foregroundStyle(GlassColor.textPrimary)
             Spacer()
+            Button {
+                actions.openSettings()
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(GlassColor.textSecondary)
+                    .frame(width: 26, height: 26)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Settings")
+            .accessibilityLabel("Settings")
             Text("\(sessions.count)")
                 .font(GlassFont.badge)
                 .foregroundStyle(GlassColor.textPrimary)

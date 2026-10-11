@@ -40,6 +40,9 @@ enum GlassTokens {
     enum Liquid {
         /// White sheen fading from the top edge to the middle.
         static let sheen: Double = 0.16
+        /// "Text contrast" halo under the widget's text.
+        static let haloOpacity: Double = 0.75
+        static let haloRadius: CGFloat = 1.5
     }
 }
 
