@@ -1,3 +1,4 @@
+import CoreGraphics
 import Observation
 
 @MainActor
@@ -8,4 +9,6 @@ final class WidgetModel {
     var isExpansionPinned = false
     /// Lamp or row under the pointer (the same index in both).
     var hoveredIndex: Int?
+    /// How far the session list is scrolled up (`WidgetMetrics.maxScroll` at most).
+    var scrollOffset: CGFloat = 0
 }

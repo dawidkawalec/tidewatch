@@ -41,13 +41,27 @@ struct WidgetMetricsTests {
         #expect(m.rowIndex(at: CGPoint(x: m.panelRect.midX, y: m.panelRect.maxY - 5)) == nil)
     }
 
-    @Test func scrollingListHasNoRowHitTesting() {
+    @Test func aLongListScrollsWithinThePanel() {
         let m = WidgetMetrics(sessionCount: 9)
         #expect(m.scrolls)
-        let rect = m.rowRect(0)
-        #expect(m.rowIndex(at: CGPoint(x: rect.midX, y: rect.midY)) == nil)
+        #expect(m.maxScroll == 9 * WidgetMetrics.rowHeight - WidgetMetrics.maxBodyHeight)
         #expect(m.panelRect.maxY <= WidgetMetrics.canvas.height)
         #expect(m.panelRect.height == WidgetMetrics.headerHeight + WidgetMetrics.maxBodyHeight + WidgetMetrics.panelBottomPadding)
+        #expect(m.clampedScroll(-20) == 0)
+        #expect(m.clampedScroll(10_000) == m.maxScroll)
+        #expect(WidgetMetrics(sessionCount: 3).maxScroll == 0)
+    }
+
+    /// Rows hit-test where they are drawn: scrolled up by `offset`, and only inside the list.
+    @Test func scrolledRowsHitTestWhereTheyAreDrawn() {
+        let m = WidgetMetrics(sessionCount: 9)
+        let offset = m.maxScroll
+        let last = m.rowRect(8, offset: offset)
+        #expect(m.rowIndex(at: CGPoint(x: last.midX, y: last.midY), offset: offset) == 8)
+        #expect(last.minY >= m.panelRect.minY)
+        // The first row scrolled out above the list is not hoverable over the header.
+        let first = m.rowRect(0, offset: offset)
+        #expect(m.rowIndex(at: CGPoint(x: first.midX, y: first.midY), offset: offset) == nil)
     }
 
     // MARK: Windows

@@ -27,6 +27,19 @@ final class WidgetPanelController {
         hostingView = WidgetHostingView(rootView: WidgetRootView(store: store, model: model, settings: settings, actions: actions))
         panel.contentView = hostingView
         hostingView.onPointer = { [weak self] in self?.evaluatePointer() }
+        hostingView.onScroll = { [weak self] deltaY in self?.scroll(by: deltaY) ?? false }
+    }
+
+    /// A wheel or trackpad scroll over the open panel moves the session list. Returns false when the
+    /// list has nothing to scroll, so the event goes on as usual.
+    private func scroll(by deltaY: CGFloat) -> Bool {
+        let metrics = store.metrics
+        guard model.isExpanded, metrics.scrolls,
+              metrics.panelRect.contains(canvasPoint(NSEvent.mouseLocation)) else { return false }
+        let next = metrics.clampedScroll(model.scrollOffset - deltaY)
+        if next != model.scrollOffset { model.scrollOffset = next }
+        evaluatePointer()
+        return true
     }
 
     /// `watchPointer: false` leaves hover and expansion to the caller (the design preview's demo).
@@ -95,7 +108,8 @@ final class WidgetPanelController {
         guard watchesPointer else { return }
         let metrics = store.metrics
         let point = canvasPoint(NSEvent.mouseLocation)
-        let hovered = metrics.lampIndex(at: point) ?? (model.isExpanded ? metrics.rowIndex(at: point) : nil)
+        let offset = metrics.clampedScroll(model.scrollOffset)
+        let hovered = metrics.lampIndex(at: point) ?? (model.isExpanded ? metrics.rowIndex(at: point, offset: offset) : nil)
         if hovered != model.hoveredIndex { model.hoveredIndex = hovered }
 
         guard !model.isExpansionPinned else { return }
@@ -123,6 +137,8 @@ final class WidgetPanelController {
 
     private func setExpanded(_ expanded: Bool) {
         guard model.isExpanded != expanded else { return }
+        // The list opens at the top again.
+        if !expanded { model.scrollOffset = 0 }
         let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         withAnimation(reduceMotion ? GlassMotion.reduced : GlassMotion.liquid) {
             model.isExpanded = expanded

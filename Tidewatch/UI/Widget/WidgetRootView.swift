@@ -16,7 +16,7 @@ struct WidgetRootView: View {
         ZStack(alignment: .topLeading) {
             Color.clear
             if model.isExpanded {
-                SessionPanelView(groups: store.groups, hoveredIndex: model.hoveredIndex, isConnected: settings.hooksConnected, metrics: metrics, actions: actions)
+                SessionPanelView(groups: store.groups, hoveredIndex: model.hoveredIndex, scrollOffset: model.scrollOffset, isConnected: settings.hooksConnected, metrics: metrics, actions: actions)
                     .textHalo(settings.textContrast)
                     .frame(width: metrics.panelRect.width, height: metrics.panelRect.height)
                     .widgetGlass(in: RoundedRectangle(cornerRadius: GlassTokens.Radius.panel, style: .continuous), tint: settings.glassTint)

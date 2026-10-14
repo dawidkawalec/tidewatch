@@ -35,6 +35,8 @@ final class WidgetPanel: NSPanel {
 /// support so rows react without activating Tidewatch.
 final class WidgetHostingView: NSHostingView<WidgetRootView> {
     var onPointer: (@MainActor () -> Void)?
+    /// Vertical scroll in points (positive = content moves down); true when it was handled.
+    var onScroll: (@MainActor (CGFloat) -> Bool)?
     private var hoverArea: NSTrackingArea?
 
     required init(rootView: WidgetRootView) {
@@ -67,6 +69,12 @@ final class WidgetHostingView: NSHostingView<WidgetRootView> {
     override func mouseMoved(with event: NSEvent) {
         super.mouseMoved(with: event)
         onPointer?()
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+        // Trackpads report points; a classic wheel reports lines.
+        let delta = event.hasPreciseScrollingDeltas ? event.scrollingDeltaY : event.scrollingDeltaY * WidgetMetrics.rowHeight / 2
+        if onScroll?(delta) != true { super.scrollWheel(with: event) }
     }
 
     override func mouseExited(with event: NSEvent) {

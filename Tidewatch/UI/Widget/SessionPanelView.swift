@@ -6,6 +6,7 @@ import SwiftUI
 struct SessionPanelView: View {
     let groups: [SessionGroup]
     let hoveredIndex: Int?
+    var scrollOffset: CGFloat = 0
     let isConnected: Bool
     let metrics: WidgetMetrics
     let actions: WidgetActions
@@ -26,27 +27,40 @@ struct SessionPanelView: View {
                 let windows = Dictionary(uniqueKeysWithValues: groups.compactMap { group in
                     group.sessions.first.map { ($0.id, group) }
                 })
+                // Scrolled by the widget itself (`scrollOffset`): the panel never becomes key, so
+                // a ScrollView here would get no scroll events.
                 TimelineView(.periodic(from: .now, by: 30)) { context in
-                    ScrollView(.vertical) {
-                        LazyVStack(spacing: 0) {
-                            ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
-                                if metrics.headerBefore(index), let window = windows[session.id] {
-                                    WindowHeader(name: window.name, count: window.sessions.count)
-                                        .frame(height: WidgetMetrics.groupHeaderHeight)
-                                }
-                                SessionRow(session: session, now: context.date, highlighted: hoveredIndex == index, actions: actions)
-                                    .frame(height: WidgetMetrics.rowHeight)
+                    VStack(spacing: 0) {
+                        ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
+                            if metrics.headerBefore(index), let window = windows[session.id] {
+                                WindowHeader(name: window.name, count: window.sessions.count)
+                                    .frame(height: WidgetMetrics.groupHeaderHeight)
                             }
+                            SessionRow(session: session, now: context.date, highlighted: hoveredIndex == index, actions: actions)
+                                .frame(height: WidgetMetrics.rowHeight)
                         }
                     }
-                    .scrollDisabled(!metrics.scrolls)
-                    .scrollIndicators(.never)
+                    .offset(y: -metrics.clampedScroll(scrollOffset))
+                    .frame(height: metrics.bodyRect.height, alignment: .top)
+                    .clipped()
+                    .overlay(alignment: .bottom) { if metrics.clampedScroll(scrollOffset) < metrics.maxScroll { scrollHint(up: false) } }
+                    .overlay(alignment: .top) { if metrics.clampedScroll(scrollOffset) > 0 { scrollHint(up: true) } }
                 }
             }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 8)
         .padding(.bottom, WidgetMetrics.panelBottomPadding)
+    }
+
+    /// A small chevron at the edge of the list while more rows are above or below.
+    private func scrollHint(up: Bool) -> some View {
+        Image(systemName: up ? "chevron.compact.up" : "chevron.compact.down")
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(GlassColor.textTertiary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 12)
+            .allowsHitTesting(false)
     }
 
     private var header: some View {

@@ -116,6 +116,20 @@ struct WidgetMetrics: Equatable, Sendable {
 
     var scrolls: Bool { contentHeight > Self.maxBodyHeight }
 
+    /// How far the list scrolls (the widget scrolls it itself: the panel never becomes key, so a
+    /// SwiftUI ScrollView in it gets no scroll events).
+    var maxScroll: CGFloat { max(0, contentHeight - Self.maxBodyHeight) }
+
+    func clampedScroll(_ offset: CGFloat) -> CGFloat {
+        min(max(offset, 0), maxScroll)
+    }
+
+    /// The list's visible area.
+    var bodyRect: CGRect {
+        let height = min(contentHeight, Self.maxBodyHeight)
+        return CGRect(x: panelRect.minX, y: panelRect.maxY - Self.headerHeight - height, width: panelRect.width, height: height)
+    }
+
     var panelRect: CGRect {
         let body = sessionCount == 0 ? Self.emptyStateHeight : min(contentHeight, Self.maxBodyHeight)
         let height = Self.headerHeight + body + Self.panelBottomPadding
@@ -127,15 +141,16 @@ struct WidgetMetrics: Equatable, Sendable {
         )
     }
 
-    func rowRect(_ index: Int) -> CGRect {
-        let top = panelRect.maxY - Self.headerHeight - rowOffset(index)
+    /// Where row `index` is drawn with the list scrolled up by `offset`.
+    func rowRect(_ index: Int, offset: CGFloat = 0) -> CGRect {
+        let top = panelRect.maxY - Self.headerHeight - rowOffset(index) + offset
         return CGRect(x: panelRect.minX, y: top - Self.rowHeight, width: panelRect.width, height: Self.rowHeight)
     }
 
-    /// Row under the point; nil when the list scrolls (rows no longer sit at fixed places).
-    func rowIndex(at point: CGPoint) -> Int? {
-        guard !scrolls else { return nil }
-        return (0..<sessionCount).first { rowRect($0).contains(point) }
+    /// Row under the point, only inside the visible list.
+    func rowIndex(at point: CGPoint, offset: CGFloat = 0) -> Int? {
+        guard bodyRect.contains(point) else { return nil }
+        return (0..<sessionCount).first { rowRect($0, offset: offset).contains(point) }
     }
 
     /// While expanded, the bounding box of column + panel, so crossing the gap keeps it open.
