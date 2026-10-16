@@ -40,13 +40,24 @@ public enum DisplayRules {
         return state.folder != claudeFolder && !state.folder.hasPrefix(claudeFolder + "/")
     }
 
-    /// Stable order: lamps never jump when a status changes.
+    /// The latest activity first (owner, 2026-10-16). Activity is the last status change: a session
+    /// moves up when it starts working, asks for approval or finishes, not on every tool call.
+    /// Ties: the newer tab first, then the id.
     public static func ordered(_ sessions: [SessionState]) -> [SessionState] {
+        sessions.sorted { a, b in
+            if a.statusSince != b.statusSince { return a.statusSince > b.statusSince }
+            if a.firstSeen != b.firstSeen { return a.firstSeen > b.firstSeen }
+            return a.sessionId < b.sessionId
+        }
+    }
+
+    /// The order tabs were opened: "#n" numbers follow it, so a name stays put when rows reorder.
+    static func byOpening(_ sessions: [SessionState]) -> [SessionState] {
         sessions.sorted { ($0.firstSeen, $0.sessionId) < ($1.firstSeen, $1.sessionId) }
     }
 
-    /// Sessions grouped by window (`window` returns a key per session), each group in stable order
-    /// and placed by its oldest session.
+    /// Sessions grouped by window (`window` returns a key per session), latest activity first in
+    /// each group, and the groups placed by their latest session.
     public static func grouped(_ sessions: [SessionState], window: (SessionState) -> String) -> [[SessionState]] {
         var groups: [String: [SessionState]] = [:]
         var keys: [String] = []
@@ -62,7 +73,7 @@ public enum DisplayRules {
     /// while it has none the folder name ("folder #n" when the window has several tabs).
     public static func rowNames(in group: [SessionState]) -> [String: String] {
         var names: [String: String] = [:]
-        for (index, session) in group.enumerated() {
+        for (index, session) in byOpening(group).enumerated() {
             names[session.sessionId] = session.title ?? (group.count > 1 ? "\(session.project) #\(index + 1)" : session.project)
         }
         return names
@@ -74,11 +85,11 @@ public enum DisplayRules {
     }
 
     /// Row titles of all groups, keyed by session id. A name that still repeats (two terminal
-    /// sessions in one folder are two windows) gets "#n" in display order.
+    /// sessions in one folder are two windows) gets "#n" in the order the sessions were opened.
     public static func names(for groups: [[SessionState]]) -> [String: String] {
         var names: [String: String] = [:]
         for group in groups { names.merge(rowNames(in: group)) { first, _ in first } }
-        let order = groups.flatMap { $0.map(\.sessionId) }
+        let order = byOpening(groups.flatMap { $0 }).map(\.sessionId)
         var counts: [String: Int] = [:]
         for id in order { counts[names[id] ?? "", default: 0] += 1 }
         var seen: [String: Int] = [:]

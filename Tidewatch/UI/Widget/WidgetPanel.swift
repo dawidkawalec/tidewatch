@@ -6,7 +6,7 @@ import SwiftUI
 final class WidgetPanel: NSPanel {
     init() {
         super.init(
-            contentRect: NSRect(origin: .zero, size: WidgetMetrics.canvas),
+            contentRect: NSRect(x: 0, y: 0, width: WidgetMetrics.canvasWidth, height: WidgetMetrics.defaultCanvasHeight),
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
             backing: .buffered,
             defer: false

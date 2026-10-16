@@ -11,8 +11,8 @@ struct WidgetRootView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let metrics = store.metrics
-        let height = WidgetMetrics.canvas.height
+        let metrics = store.metrics(canvasHeight: model.canvasHeight)
+        let height = metrics.canvas.height
         ZStack(alignment: .topLeading) {
             Color.clear
             if model.isExpanded {
@@ -28,7 +28,7 @@ struct WidgetRootView: View {
                 .widgetGlass(in: Capsule(style: .continuous), tint: settings.glassTint)
                 .position(x: metrics.columnRect.midX, y: height - metrics.columnRect.midY)
         }
-        .frame(width: WidgetMetrics.canvas.width, height: height)
+        .frame(width: metrics.canvas.width, height: height)
         // The capsule grows and shrinks like liquid when sessions come and go.
         .animation(reduceMotion ? nil : GlassMotion.liquid, value: store.sessions.map(\.id))
         .environment(\.appearsActive, true)

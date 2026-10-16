@@ -105,8 +105,7 @@ enum DesignPreview {
         settings.hooksConnected = target != .disconnected
 
         guard let screen = NSScreen.screens.first else { return }
-        let origin = WidgetMetrics.canvasOrigin(in: screen.visibleFrame)
-        let frame = NSRect(origin: origin, size: WidgetMetrics.canvas)
+        let frame = WidgetMetrics.canvasFrame(in: screen.visibleFrame, height: WidgetMetrics.defaultCanvasHeight)
         if let path = ProcessInfo.processInfo.environment["TIDEWATCH_PREVIEW_BACKDROP"], let image = NSImage(contentsOfFile: path) {
             let backdrop = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
             backdrop.level = .floating
@@ -119,7 +118,7 @@ enum DesignPreview {
 
         let controller = WidgetPanelController(store: store, settings: settings, actions: .preview)
         // The demo drives expansion and hover itself; the pointer must not take them over.
-        controller.show(pinnedExpanded: target != .collapsed, watchPointer: !isDemo)
+        controller.show(pinnedExpanded: target != .collapsed, watchPointer: !isDemo, canvasHeight: WidgetMetrics.defaultCanvasHeight)
         if isDemo {
             Demo.play(store: store, files: files, model: controller.model)
         }

@@ -1,9 +1,10 @@
 import SwiftUI
 
 /// The widget's glass (column and panel): a light tinted fill that follows the system appearance,
-/// a sheen on the upper half, a luminous rim and a soft shadow under the shape only. The blur
-/// behind it comes from the window (`WindowBlur`, a small radius, so the background still shows
-/// through). Reduce Transparency: solid window background with the same rim.
+/// a sheen on the upper half and a luminous rim. The blur behind it comes from the window
+/// (`WindowBlur`, a small radius, so the background still shows through). No drop shadow: the
+/// window server blurs behind every visible pixel, so a soft shadow showed as a blurred halo around
+/// the glass (owner, 2026-10-16). Reduce Transparency: solid window background with the same rim.
 @MainActor
 struct WidgetGlass<S: InsettableShape>: ViewModifier {
     let shape: S
@@ -24,7 +25,6 @@ struct WidgetGlass<S: InsettableShape>: ViewModifier {
                         .overlay {
                             shape.fill(LinearGradient(colors: [Color.white.opacity(GlassTokens.Liquid.sheen), .clear], startPoint: .top, endPoint: .center))
                         }
-                        .shadow(color: .black.opacity(GlassTokens.Shadow.liftOpacity), radius: GlassTokens.Shadow.liftRadius, y: GlassTokens.Shadow.liftY)
                         .allowsHitTesting(false)
                 }
                 .overlay { rim }

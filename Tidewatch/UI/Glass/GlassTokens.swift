@@ -23,10 +23,6 @@ enum GlassTokens {
     }
 
     enum Shadow {
-        /// Soft lift under the glass, so clear glass still reads over a white document.
-        static let liftOpacity: Double = 0.22
-        static let liftRadius: CGFloat = 14
-        static let liftY: CGFloat = 5
         /// Hairline around the glass: dark in light mode, light in dark mode.
         static let hairline: Double = 0.08
         /// Heavier shadow of the macOS 14/15 material path.

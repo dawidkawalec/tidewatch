@@ -15,6 +15,7 @@ final class WidgetPanelController {
     private var hoverTarget: Bool?
     private var screenObserver: NSObjectProtocol?
     private var watchesPointer = true
+    private var fixedCanvasHeight: CGFloat?
     private let settings: AppSettings
 
     var windowNumber: Int { panel.windowNumber }
@@ -33,7 +34,7 @@ final class WidgetPanelController {
     /// A wheel or trackpad scroll over the open panel moves the session list. Returns false when the
     /// list has nothing to scroll, so the event goes on as usual.
     private func scroll(by deltaY: CGFloat) -> Bool {
-        let metrics = store.metrics
+        let metrics = self.metrics
         guard model.isExpanded, metrics.scrolls,
               metrics.panelRect.contains(canvasPoint(NSEvent.mouseLocation)) else { return false }
         let next = metrics.clampedScroll(model.scrollOffset - deltaY)
@@ -42,11 +43,16 @@ final class WidgetPanelController {
         return true
     }
 
+    /// The geometry for the sessions shown now on the current canvas.
+    private var metrics: WidgetMetrics { store.metrics(canvasHeight: model.canvasHeight) }
+
     /// `watchPointer: false` leaves hover and expansion to the caller (the design preview's demo).
-    func show(pinnedExpanded: Bool = false, watchPointer: Bool = true) {
+    /// `canvasHeight`: a fixed canvas (the preview's 600); nil is the screen's visible height.
+    func show(pinnedExpanded: Bool = false, watchPointer: Bool = true, canvasHeight: CGFloat? = nil) {
         model.isExpansionPinned = pinnedExpanded
         model.isExpanded = pinnedExpanded
         watchesPointer = watchPointer
+        fixedCanvasHeight = canvasHeight
         reposition()
         panel.orderFrontRegardless()
         applyGlass()
@@ -85,9 +91,13 @@ final class WidgetPanelController {
         setExpanded(false)
     }
 
+    /// The canvas covers the right edge of the menu bar screen, top to bottom of its visible
+    /// frame (transparent pixels let clicks through), so the widget can grow to the screen.
     private func reposition() {
         guard let screen = NSScreen.screens.first else { return }
-        panel.setFrameOrigin(WidgetMetrics.canvasOrigin(in: screen.visibleFrame))
+        let frame = WidgetMetrics.canvasFrame(in: screen.visibleFrame, height: fixedCanvasHeight)
+        model.canvasHeight = frame.height
+        panel.setFrame(frame, display: true)
     }
 
     // MARK: Pointer
@@ -106,7 +116,7 @@ final class WidgetPanelController {
 
     private func evaluatePointer() {
         guard watchesPointer else { return }
-        let metrics = store.metrics
+        let metrics = self.metrics
         let point = canvasPoint(NSEvent.mouseLocation)
         let offset = metrics.clampedScroll(model.scrollOffset)
         let hovered = metrics.lampIndex(at: point) ?? (model.isExpanded ? metrics.rowIndex(at: point, offset: offset) : nil)
@@ -129,7 +139,7 @@ final class WidgetPanelController {
             guard !Task.isCancelled, let self else { return }
             self.hoverTask = nil
             self.hoverTarget = nil
-            let metrics = self.store.metrics
+            let metrics = self.metrics
             guard metrics.hoverRect(expanded: self.model.isExpanded).contains(self.canvasPoint(NSEvent.mouseLocation)) == wanted else { return }
             self.setExpanded(wanted)
         }

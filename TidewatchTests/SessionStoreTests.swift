@@ -44,9 +44,10 @@ struct SessionStoreTests {
         try files.write(state, to: files.fileURL(for: id))
     }
 
-    @Test func loadsSessionsInStableOrderWithNames() throws {
+    /// The latest activity first: "a" asked for approval after "b" started working.
+    @Test func loadsSessionsLatestActivityFirstWithNames() throws {
         try put("b", .working, cwd: "/Users/demo/site", firstSeen: 10)
-        try put("a", .needsApproval, cwd: "/Users/demo/app", firstSeen: 5)
+        try put("a", .needsApproval, cwd: "/Users/demo/app", firstSeen: 5, lastEvent: 20)
         let store = makeStore()
         store.reload()
         #expect(store.sessions.map(\.id) == ["a", "b"])
@@ -107,9 +108,10 @@ struct SessionStoreTests {
         try put("a", .needsApproval)
         try put("b", .awaitingReview, firstSeen: 1)
         store.reload()
+        // In display order: same activity time, so the newer tab "b" first.
         #expect(transitions == [
-            SessionTransition(sessionId: "a", from: .working, to: .needsApproval),
             SessionTransition(sessionId: "b", from: nil, to: .awaitingReview),
+            SessionTransition(sessionId: "a", from: .working, to: .needsApproval),
         ])
 
         store.reload()
@@ -177,10 +179,11 @@ struct SessionStoreTests {
             transcripts: ["checkout": "Checkout redesign", "onboarding": "Onboarding review", "skills": "Skills audit"]
         )
         store.reload()
+        // Same activity time from the registry: the newer tab first, its window first.
         #expect(store.groups.map(\.name) == ["atlas", "promo-kit"])
-        #expect(store.groups.map { $0.sessions.map(\.id) } == [["checkout", "onboarding"], ["skills"]])
-        #expect(store.sessions.map(\.name) == ["Checkout redesign", "Onboarding review", "Skills audit"])
-        #expect(store.sessions.map(\.status) == [.needsApproval, .idle, .working])
+        #expect(store.groups.map { $0.sessions.map(\.id) } == [["onboarding", "checkout"], ["skills"]])
+        #expect(store.sessions.map(\.name) == ["Onboarding review", "Checkout redesign", "Skills audit"])
+        #expect(store.sessions.map(\.status) == [.idle, .needsApproval, .working])
     }
 
     /// An empty Claude tab has no transcript yet; neither has the spare tab whose file an older
@@ -214,8 +217,9 @@ struct SessionStoreTests {
         try put("b", .working, cwd: "/w/app", firstSeen: 1)
         let store = makeStore()
         store.reload()
-        #expect(store.groups.map { $0.sessions.map(\.id) } == [["a"], ["b"]])
-        #expect(store.sessions.map(\.name) == ["app #1", "app #2"])
+        // The newer tab on top; "#n" stays with the tab (the order they were opened).
+        #expect(store.groups.map { $0.sessions.map(\.id) } == [["b"], ["a"]])
+        #expect(store.sessions.map(\.name) == ["app #2", "app #1"])
     }
 
     @Test func livenessOfThisProcessIsTrue() {

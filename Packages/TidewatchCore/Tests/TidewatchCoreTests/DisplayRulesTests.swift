@@ -46,9 +46,18 @@ struct DisplayRulesTests {
         #expect(DisplayRules.isAbandoned(s, now: t0.addingTimeInterval(49 * 3600)))
     }
 
-    @Test func orderIsStableByFirstSeenThenId() {
-        let list = [session("c", firstSeen: 20), session("b", firstSeen: 10), session("a", firstSeen: 10)]
-        #expect(DisplayRules.ordered(list).map(\.sessionId) == ["a", "b", "c"])
+    /// The owner, 2026-10-16: the latest activity on top. Activity is the last status change, so
+    /// a working session does not jump on every tool call. Ties: the newer tab first, then the id.
+    @Test func theLatestStatusChangeComesFirst() {
+        var a = session("a", firstSeen: 10)
+        a.statusSince = t0.addingTimeInterval(100)
+        var b = session("b", firstSeen: 20)
+        b.statusSince = t0.addingTimeInterval(300)
+        var c = session("c", firstSeen: 30)
+        c.statusSince = t0.addingTimeInterval(200)
+        var d = session("d", firstSeen: 40)
+        d.statusSince = t0.addingTimeInterval(200)
+        #expect(DisplayRules.ordered([a, b, c, d]).map(\.sessionId) == ["b", "d", "c", "a"])
     }
 
     @Test func statusLines() {

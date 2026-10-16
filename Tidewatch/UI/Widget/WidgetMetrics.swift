@@ -6,8 +6,16 @@ import CoreGraphics
 /// Sessions come in windows (`groupSizes`, in widget order). A window with several tabs is parted
 /// from its neighbours by a gap in the column and gets a header in the list; windows with one tab
 /// each look like a plain list.
+///
+/// The canvas is as tall as the screen's visible frame (owner, 2026-10-16: no scrolling, every
+/// session visible), so the column and the list grow with the sessions. Only more sessions than
+/// the screen holds fall back to the chevron and scrolling. Previews keep 402 x 600.
 struct WidgetMetrics: Equatable, Sendable {
-    static let canvas = CGSize(width: 402, height: 600)
+    static let canvasWidth: CGFloat = 402
+    /// The design previews and the page recordings.
+    static let defaultCanvasHeight: CGFloat = 600
+    /// Kept clear above and below the column and the panel.
+    static let screenMargin: CGFloat = 12
     static let edgeGap: CGFloat = 8
     static let columnWidth: CGFloat = 36
     static let columnPadding: CGFloat = 9
@@ -15,15 +23,12 @@ struct WidgetMetrics: Equatable, Sendable {
     static let lampSize: CGFloat = 12
     static let groupGap: CGFloat = 10
     static let chevronHeight: CGFloat = 16
-    static let maxLamps = 10
     static let panelGap: CGFloat = 16
     static let panelWidth: CGFloat = 330
     static let headerHeight: CGFloat = 52
     static let groupHeaderHeight: CGFloat = 26
     static let rowHeight: CGFloat = 50
     static let panelBottomPadding: CGFloat = 8
-    /// The list scrolls past this (eight rows).
-    static let maxBodyHeight: CGFloat = 400
     static let emptyStateHeight: CGFloat = 96
     static let hoverSlop: CGFloat = 8
     static let expandDelay: Duration = .milliseconds(280)
@@ -31,12 +36,14 @@ struct WidgetMetrics: Equatable, Sendable {
     static let pointerPoll: Duration = .milliseconds(150)
 
     let groupSizes: [Int]
+    let canvas: CGSize
     /// Per session in widget order: whether its window has several tabs, and whether it is the
     /// first of its window.
     private let grouped: [Bool]
     private let opensGroup: [Bool]
 
-    init(groupSizes: [Int]) {
+    init(groupSizes: [Int], canvasHeight: CGFloat = Self.defaultCanvasHeight) {
+        canvas = CGSize(width: Self.canvasWidth, height: canvasHeight)
         self.groupSizes = groupSizes.filter { $0 > 0 }
         var grouped: [Bool] = []
         var opensGroup: [Bool] = []
@@ -51,15 +58,29 @@ struct WidgetMetrics: Equatable, Sendable {
     }
 
     /// One tab per window.
-    init(sessionCount: Int) {
-        self.init(groupSizes: Array(repeating: 1, count: max(sessionCount, 0)))
+    init(sessionCount: Int, canvasHeight: CGFloat = Self.defaultCanvasHeight) {
+        self.init(groupSizes: Array(repeating: 1, count: max(sessionCount, 0)), canvasHeight: canvasHeight)
     }
 
     var sessionCount: Int { grouped.count }
 
+    /// Height the column and the panel may take.
+    private var usableHeight: CGFloat { canvas.height - 2 * Self.screenMargin }
+
+    /// How many lamps the column shows: all of them while they fit the screen.
+    var maxLamps: Int {
+        let room = usableHeight - 2 * Self.columnPadding
+        if sessionCount == 0 || lampOffset(sessionCount - 1) + Self.lampPitch <= room { return max(sessionCount, 1) }
+        let withChevron = room - Self.chevronHeight
+        return (1..<sessionCount).last { lampOffset($0 - 1) + Self.lampPitch <= withChevron } ?? 1
+    }
+
     /// No sessions still shows one dim lamp.
-    var visibleLamps: Int { min(max(sessionCount, 1), Self.maxLamps) }
-    var hasOverflow: Bool { sessionCount > Self.maxLamps }
+    var visibleLamps: Int { min(max(sessionCount, 1), maxLamps) }
+    var hasOverflow: Bool { sessionCount > maxLamps }
+
+    /// The list scrolls only past this: the screen's height minus the panel's header.
+    var maxBodyHeight: CGFloat { usableHeight - Self.headerHeight - Self.panelBottomPadding }
 
     /// A gap above this lamp: it opens a window and this window or the one above has several tabs.
     func gapBefore(_ index: Int) -> Bool {
@@ -84,8 +105,8 @@ struct WidgetMetrics: Equatable, Sendable {
         let lamps = lampOffset(visibleLamps - 1) + Self.lampPitch
         let height = lamps + 2 * Self.columnPadding + (hasOverflow ? Self.chevronHeight : 0)
         return CGRect(
-            x: Self.canvas.width - Self.edgeGap - Self.columnWidth,
-            y: ((Self.canvas.height - height) / 2).rounded(),
+            x: canvas.width - Self.edgeGap - Self.columnWidth,
+            y: ((canvas.height - height) / 2).rounded(),
             width: Self.columnWidth,
             height: height
         )
@@ -98,7 +119,7 @@ struct WidgetMetrics: Equatable, Sendable {
 
     func lampIndex(at point: CGPoint) -> Int? {
         guard sessionCount > 0, columnRect.contains(point) else { return nil }
-        return (0..<min(sessionCount, Self.maxLamps)).first { abs(lampCenter($0).y - point.y) < Self.lampPitch / 2 }
+        return (0..<min(sessionCount, maxLamps)).first { abs(lampCenter($0).y - point.y) < Self.lampPitch / 2 }
     }
 
     // MARK: Panel
@@ -114,11 +135,11 @@ struct WidgetMetrics: Equatable, Sendable {
         sessionCount == 0 ? 0 : rowOffset(sessionCount - 1) + Self.rowHeight
     }
 
-    var scrolls: Bool { contentHeight > Self.maxBodyHeight }
+    var scrolls: Bool { contentHeight > maxBodyHeight }
 
     /// How far the list scrolls (the widget scrolls it itself: the panel never becomes key, so a
     /// SwiftUI ScrollView in it gets no scroll events).
-    var maxScroll: CGFloat { max(0, contentHeight - Self.maxBodyHeight) }
+    var maxScroll: CGFloat { max(0, contentHeight - maxBodyHeight) }
 
     func clampedScroll(_ offset: CGFloat) -> CGFloat {
         min(max(offset, 0), maxScroll)
@@ -126,16 +147,16 @@ struct WidgetMetrics: Equatable, Sendable {
 
     /// The list's visible area.
     var bodyRect: CGRect {
-        let height = min(contentHeight, Self.maxBodyHeight)
+        let height = min(contentHeight, maxBodyHeight)
         return CGRect(x: panelRect.minX, y: panelRect.maxY - Self.headerHeight - height, width: panelRect.width, height: height)
     }
 
     var panelRect: CGRect {
-        let body = sessionCount == 0 ? Self.emptyStateHeight : min(contentHeight, Self.maxBodyHeight)
+        let body = sessionCount == 0 ? Self.emptyStateHeight : min(contentHeight, maxBodyHeight)
         let height = Self.headerHeight + body + Self.panelBottomPadding
         return CGRect(
             x: columnRect.minX - Self.panelGap - Self.panelWidth,
-            y: ((Self.canvas.height - height) / 2).rounded(),
+            y: ((canvas.height - height) / 2).rounded(),
             width: Self.panelWidth,
             height: height
         )
@@ -159,15 +180,17 @@ struct WidgetMetrics: Equatable, Sendable {
         return base.insetBy(dx: -Self.hoverSlop, dy: -Self.hoverSlop)
     }
 
-    /// Canvas origin: glued to the right edge of the visible frame, centred vertically.
-    static func canvasOrigin(in visibleFrame: CGRect) -> CGPoint {
-        CGPoint(x: visibleFrame.maxX - canvas.width, y: (visibleFrame.midY - canvas.height / 2).rounded())
+    /// The canvas window: glued to the right edge of the visible frame, as tall as it (or `height`,
+    /// centred vertically).
+    static func canvasFrame(in visibleFrame: CGRect, height: CGFloat? = nil) -> CGRect {
+        let height = height ?? visibleFrame.height
+        return CGRect(x: visibleFrame.maxX - canvasWidth, y: (visibleFrame.midY - height / 2).rounded(), width: canvasWidth, height: height)
     }
 }
 
 extension SessionStore {
-    /// The widget's geometry for the sessions shown right now.
-    var metrics: WidgetMetrics {
-        WidgetMetrics(groupSizes: groups.map(\.sessions.count))
+    /// The widget's geometry for the sessions shown right now, on a canvas this tall.
+    func metrics(canvasHeight: CGFloat) -> WidgetMetrics {
+        WidgetMetrics(groupSizes: groups.map(\.sessions.count), canvasHeight: canvasHeight)
     }
 }

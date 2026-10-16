@@ -13,7 +13,7 @@ struct LampColumn: View {
                 StatusLamp(status: nil)
                     .frame(height: WidgetMetrics.lampPitch)
             } else {
-                ForEach(Array(sessions.prefix(WidgetMetrics.maxLamps).enumerated()), id: \.element.id) { index, session in
+                ForEach(Array(sessions.prefix(metrics.maxLamps).enumerated()), id: \.element.id) { index, session in
                     StatusLamp(status: session.status, highlighted: hoveredIndex == index)
                         .frame(height: WidgetMetrics.lampPitch)
                         // The tabs of one window sit together.

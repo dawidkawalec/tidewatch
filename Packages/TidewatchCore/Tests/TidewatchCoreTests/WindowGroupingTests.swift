@@ -7,23 +7,44 @@ import Testing
 struct WindowGroupingTests {
     private let t0 = Date(timeIntervalSince1970: 1_791_620_000)
 
-    private func state(_ id: String, cwd: String, firstSeen: TimeInterval, title: String? = nil) -> SessionState {
+    private func state(_ id: String, cwd: String, firstSeen: TimeInterval, title: String? = nil, active: TimeInterval? = nil) -> SessionState {
         var state = SessionState(sessionId: id, cwd: cwd, host: .vscode, terminalApp: nil, pid: nil, now: t0.addingTimeInterval(firstSeen))
         state.title = title
         state.startedConversation = true
+        if let active { state.statusSince = t0.addingTimeInterval(active) }
         return state
     }
 
-    @Test func groupsFollowTheirOldestSessionAndKeepTheirOrder() {
+    /// The window with the latest activity comes first, and inside it the latest session.
+    @Test func groupsFollowTheirLatestSession() {
         let sessions = [
-            state("c", cwd: "/w/atlas", firstSeen: 30),
-            state("a", cwd: "/w/promo", firstSeen: 10),
-            state("b", cwd: "/w/atlas", firstSeen: 20),
-            state("d", cwd: "/w/promo", firstSeen: 40),
+            state("a", cwd: "/w/promo", firstSeen: 10, active: 100),
+            state("b", cwd: "/w/atlas", firstSeen: 20, active: 300),
+            state("c", cwd: "/w/atlas", firstSeen: 30, active: 50),
+            state("d", cwd: "/w/promo", firstSeen: 40, active: 200),
         ]
         let window = ["a": "w1", "d": "w1", "b": "w2", "c": "w2"]
         let groups = DisplayRules.grouped(sessions) { window[$0.sessionId]! }
-        #expect(groups.map { $0.map(\.sessionId) } == [["a", "d"], ["b", "c"]])
+        #expect(groups.map { $0.map(\.sessionId) } == [["b", "c"], ["d", "a"]])
+    }
+
+    /// "#n" follows the order the tabs were opened, so a name stays put when the rows reorder.
+    @Test func tabNumbersFollowWhenTheTabOpenedNotTheRowOrder() {
+        let names = DisplayRules.rowNames(in: [
+            state("c", cwd: "/w/atlas", firstSeen: 2, active: 300),
+            state("a", cwd: "/w/atlas", firstSeen: 0, title: "Checkout redesign", active: 100),
+            state("b", cwd: "/w/atlas", firstSeen: 1, active: 200),
+        ])
+        #expect(names == ["a": "Checkout redesign", "b": "atlas #2", "c": "atlas #3"])
+    }
+
+    @Test func equalNamesAcrossWindowsAreNumberedByWhenTheyOpened() {
+        let names = DisplayRules.names(for: [
+            [state("c", cwd: "/w/app", firstSeen: 2, active: 300)],
+            [state("b", cwd: "/w/site", firstSeen: 1, active: 200)],
+            [state("a", cwd: "/w/app", firstSeen: 0, active: 100)],
+        ])
+        #expect(names == ["a": "app #1", "b": "site", "c": "app #2"])
     }
 
     @Test func aWindowWithOneTabIsNamedAfterItsConversation() {
