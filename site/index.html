@@ -100,7 +100,7 @@
       </div>
       <ul class="stats">
         <li class="card stat" data-reveal><p class="num">4<span>states</span></p><p>Working, needs you, ready for review and idle. Colors, not text.</p></li>
-        <li class="card stat" data-reveal style="--d:.08s"><p class="num">1<span>click</span></p><p>From the lamp to the right VS Code window and its Claude tab.</p></li>
+        <li class="card stat" data-reveal style="--d:.08s"><p class="num">1<span>click</span></p><p>From the lamp to the right VS Code window and its Claude tab, or straight to the T3 Code thread.</p></li>
         <li class="card stat" data-reveal style="--d:.16s"><p class="num">0<span>data collected</span></p><p>No account, no analytics, no telemetry. Your sessions never leave your Mac.</p></li>
         <li class="card stat" data-reveal style="--d:.24s"><p class="num">2<span>sounds</span></p><p>"Glass" when a session needs you, "Tink" when it finishes a turn.</p></li>
       </ul>
@@ -146,7 +146,7 @@
         <ol class="how-list">
           <li data-reveal><span class="step">01</span><div><h3>Glued to the edge</h3><p>The column floats on the right edge above every window and never takes focus, so typing in your editor is never interrupted.</p></div></li>
           <li data-reveal style="--d:.06s"><span class="step">02</span><div><h3>Hover for the list</h3><p>The panel wells out of the column like a drop of glass: project, what Claude is doing and how long it has been in that state.</p></div></li>
-          <li data-reveal style="--d:.12s"><span class="step">03</span><div><h3>Click to jump</h3><p>The right VS Code window comes to the front with that session's Claude tab open. Terminal sessions bring their terminal forward.</p></div></li>
+          <li data-reveal style="--d:.12s"><span class="step">03</span><div><h3>Click to jump</h3><p>The right VS Code window comes to the front with that session's Claude tab open. T3 Code sessions open their thread in T3 Code. Terminal sessions bring their terminal forward.</p></div></li>
           <li data-reveal style="--d:.18s"><span class="step">04</span><div><h3>Hear it, too</h3><p>A soft sound when a session needs your approval or finishes a turn, so you can keep working in another window.</p></div></li>
         </ol>
       </div>
@@ -196,8 +196,8 @@
         <h3>Requirements</h3>
         <ul>
           <li>macOS 14.4 or later, Apple silicon</li>
-          <li>Claude Code: the VS Code extension or the CLI</li>
-          <li>VS Code for jumping straight into a session</li>
+          <li>Claude Code: the VS Code extension, T3 Code or the CLI</li>
+          <li>VS Code or T3 Code for jumping straight into a session</li>
           <li>Liquid Glass on macOS 26, frosted glass on 14 and 15</li>
         </ul>
         <a class="btn btn-light btn-wide" href="download/Tidewatch.dmg">
@@ -237,6 +237,10 @@
           <details>
             <summary>Does it work with the Claude Code CLI?</summary>
             <p>Yes. CLI sessions get their lamp too. A click brings Terminal, iTerm, Ghostty or Warp to the front, or opens the folder in VS Code when the session runs in VS Code's terminal.</p>
+          </details>
+          <details>
+            <summary>Does it work with T3 Code?</summary>
+            <p>Yes. Sessions running in T3 Code get their lamp, grouped by project like in T3's sidebar, and a click opens that exact thread in T3 Code.</p>
           </details>
           <details>
             <summary>How do updates work?</summary>
