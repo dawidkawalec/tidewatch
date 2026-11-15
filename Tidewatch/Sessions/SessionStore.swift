@@ -109,10 +109,12 @@ final class SessionStore {
             live.append(state)
         }
 
-        // A VS Code tab's process is a child of its window's extension host.
+        // A VS Code tab's process is a child of its window's extension host. Every T3 Code session
+        // is a child of the one T3 server, so T3 sessions group by project, like T3's sidebar.
         let parent = system.parent
         func windowKey(_ state: SessionState) -> String {
-            state.pid.flatMap(parent).map { "window-\($0)" } ?? "session-\(state.sessionId)"
+            if state.host == .t3 { return "t3-\(state.folder)" }
+            return state.pid.flatMap(parent).map { "window-\($0)" } ?? "session-\(state.sessionId)"
         }
         let grouped = DisplayRules.grouped(live, window: windowKey)
         let names = DisplayRules.names(for: grouped)

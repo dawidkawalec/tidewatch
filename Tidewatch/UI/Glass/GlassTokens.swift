@@ -65,6 +65,8 @@ enum GlassColor {
     static let idleLamp = Color(hex: 0x9AA3AD)
     /// The VS Code glyph in the rows.
     static let vscode = Color(hex: 0x3BA0F0)
+    /// The T3 Code glyph in the rows.
+    static let t3 = Color(hex: 0xA48BFA)
 
     /// Rim stroke of the macOS 14/15 path: luminous top edge fading toward the bottom.
     static func rim(top: Double = 0.62, bottom: Double = 0.14) -> LinearGradient {

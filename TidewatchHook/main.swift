@@ -15,7 +15,8 @@ do {
         host: HostDetector.host(environment),
         terminalApp: HostDetector.terminalApp(environment),
         // The hook command is a direct child of the Claude Code process (spike 6.3).
-        pid: getppid()
+        pid: getppid(),
+        t3ThreadId: HostDetector.t3ThreadId(environment)
     )
     try SessionFileStore(directory: DataPaths.sessions(environment: environment)).apply(event, context: context)
 } catch {

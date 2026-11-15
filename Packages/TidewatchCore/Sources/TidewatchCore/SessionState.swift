@@ -15,6 +15,9 @@ public struct SessionState: Codable, Sendable, Equatable, Identifiable {
     public var host: SessionHost
     /// `TERM_PROGRAM` of a terminal session ("iTerm.app", "Apple_Terminal", ...).
     public var terminalApp: String?
+    /// `T3CODE_THREAD_ID` of a T3 Code session: the thread a click opens. nil elsewhere and in
+    /// files from before 0.5.0.
+    public var t3ThreadId: String?
     /// The Claude Code process (the helper's parent), used to drop crashed sessions.
     public var pid: Int32?
     public var status: SessionStatus
@@ -56,6 +59,7 @@ public struct SessionState: Codable, Sendable, Equatable, Identifiable {
         title = nil
         self.host = host
         self.terminalApp = terminalApp
+        t3ThreadId = nil
         self.pid = pid
         status = .idle
         activity = .working

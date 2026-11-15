@@ -15,6 +15,9 @@ public enum SessionMerge {
                 state.root = process.cwd
                 state.pid = process.pid
                 state.firstSeen = min(state.firstSeen, process.startedAt)
+                // A T3 session whose last hook ran under a helper from before 0.5.0 was written as
+                // a terminal one; the registry knows better (a click then opens the T3 project).
+                if HostDetector.host(entrypoint: process.entrypoint) == .t3 { state.host = .t3 }
                 merged.append(state)
             } else {
                 merged.append(state(from: process))
@@ -31,7 +34,7 @@ public enum SessionMerge {
 
     /// A session known only from the registry: its status is coarser than what the hooks report.
     static func state(from process: ClaudeProcess) -> SessionState {
-        let host: SessionHost = process.entrypoint == "claude-vscode" ? .vscode : .terminal
+        let host = HostDetector.host(entrypoint: process.entrypoint)
         var state = SessionState(sessionId: process.sessionId, cwd: process.cwd, host: host, terminalApp: nil, pid: process.pid, now: process.startedAt)
         state.startedConversation = nil
         switch process.status {

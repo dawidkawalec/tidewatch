@@ -10,7 +10,7 @@ Status: built (MVP, 2026-10-10), installed and accepted end to end against real 
 | `tidewatch-hook` | `TidewatchHook/` | Reads one hook event from stdin, reduces it into `sessions/<session_id>.json` under `flock`, writes tmp + rename, exits 0 |
 | App: sessions | `Tidewatch/Sessions/` | Folder watcher (DispatchSource, 100 ms debounce), `SessionStore` (`@Observable`, sessions grouped by window), acknowledged sessions, `ClaudeSystem` (registry, process table, `TranscriptReader`) |
 | App: updates | `Tidewatch/App/AppUpdater*.swift` | Sparkle wrapper and the testable configuration rules (feed, key, public build) |
-| App: integration | `Tidewatch/Integration/` | `HookInstaller` (settings.json), `HelperInstaller` (stable helper copy), `SessionOpener` (VS Code / terminal), `SoundPlayer`, process liveness |
+| App: integration | `Tidewatch/Integration/` | `HookInstaller` (settings.json), `HelperInstaller` (stable helper copy), `SessionOpener` (VS Code / T3 Code / terminal), `SoundPlayer`, process liveness |
 | App: UI | `Tidewatch/UI/` | Glass tokens from Captylo, the widget `NSPanel`, lamp column, session panel, design preview (static targets and the scripted `widget-demo` cycle) |
 | Download page | `site/` | Static page for kawalec.pl/tidewatch (with the Sparkle appcast in `site/updates/`), built and deployed by `scripts/site.sh`; its looping videos are recorded from `widget-demo` by `scripts/record-demo.sh` |
 
@@ -26,7 +26,10 @@ Claude Code hook event (stdin JSON)
 ~/.claude/projects/<folder>/<id>.jsonl (only the last 256 KB, only the title lines)
   -> conversation started? and its title
 parent pid of the claude process = the VS Code window (extension host) -> groups
+  (T3 Code sessions all share the T3 server as parent: they group by project folder instead)
 click on a row -> open folder in VS Code -> vscode://anthropic.claude-code/open?session=<id>
+click on a T3 Code row -> t3code://threads/<environmentId>/<T3CODE_THREAD_ID>
+  (environment id from ~/.t3/userdata/environment-id; without a thread: `~/.t3/bin/t3 app <folder>`)
 ```
 
 ## Decisions
@@ -54,6 +57,7 @@ click on a row -> open folder in VS Code -> vscode://anthropic.claude-code/open?
 | Download page on kawalec.pl, not its own domain | One static folder on the VPS served at kawalec.pl/tidewatch/ through one Caddy snippet (`deploy/Caddyfile.tidewatch.snippet`); craftweb.pl/tidewatch redirects there; the DMGs sit outside the page folder behind a `Tidewatch.dmg` symlink, as in Captylo |
 | Sparkle updates, a daily check (owner's call, 2026-10-10) | Same setup as Captylo (2.9.4, EdDSA appcast, inside-out signing). The app's only network access: `kawalec.pl/tidewatch/updates/appcast.xml` once a day, nothing about the user or sessions. Off in development builds (build number 1) and in the preview and test host |
 | Page videos recorded from the app, not mocked | `widget-demo` plays a periodic, drift-free 12 s cycle that ends on its first frame, so a one-period cut loops seamlessly and always shows the real glass and motion |
+| T3 Code as a third host (owner's call, 2026-11-15) | The owner moved from VS Code to T3 Code, and a click on a T3 session opened Finder. T3 runs Claude Code with `CLAUDE_CODE_ENTRYPOINT=t3-code` and `T3CODE_THREAD_ID`; the hook stores the thread and a click opens `t3code://threads/<environmentId>/<threadId>`, the route T3 0.1.9 accepts for incoming links (read from its bundle). Tidewatch only reads T3's `userdata/environment-id`. Without a thread or environment id the click falls back to `t3 app <folder>`, then to the T3 app |
 | Page fonts self-hosted (Funnel Display, Mozilla Text, as on kawalec.pl) | The page makes no third-party requests and sets no cookies |
 
 ## Dependencies

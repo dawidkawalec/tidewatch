@@ -6,12 +6,14 @@ public struct EventContext: Sendable, Equatable {
     public var host: SessionHost
     public var terminalApp: String?
     public var pid: Int32?
+    public var t3ThreadId: String?
 
-    public init(now: Date, host: SessionHost, terminalApp: String?, pid: Int32?) {
+    public init(now: Date, host: SessionHost, terminalApp: String?, pid: Int32?, t3ThreadId: String? = nil) {
         self.now = now
         self.host = host
         self.terminalApp = terminalApp
         self.pid = pid
+        self.t3ThreadId = t3ThreadId
     }
 }
 
@@ -46,6 +48,7 @@ public enum SessionReducer {
         if !event.cwd.isEmpty { state.cwd = event.cwd }
         state.host = context.host
         state.terminalApp = context.terminalApp
+        state.t3ThreadId = context.t3ThreadId
         if let pid = context.pid { state.pid = pid }
         state.lastEvent = now
         if let title = event.sessionTitle?.trimmingCharacters(in: .whitespacesAndNewlines), !title.isEmpty {

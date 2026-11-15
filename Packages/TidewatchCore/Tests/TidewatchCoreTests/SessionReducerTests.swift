@@ -28,6 +28,21 @@ struct SessionReducerTests {
         return state
     }
 
+    @Test func t3SessionsRememberTheirThread() throws {
+        let t3 = EventContext(now: t0, host: .t3, terminalApp: nil, pid: 100, t3ThreadId: "thread-1")
+        guard case .write(let state) = SessionReducer.reduce(nil, event(.userPromptSubmit), context: t3) else {
+            Issue.record("expected a write")
+            return
+        }
+        #expect(state.host == .t3)
+        #expect(state.t3ThreadId == "thread-1")
+        // A file from before 0.5.0 has no thread; it decodes as nil.
+        var json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(state)) as! [String: Any]
+        json.removeValue(forKey: "t3ThreadId")
+        let old = try JSONDecoder().decode(SessionState.self, from: JSONSerialization.data(withJSONObject: json))
+        #expect(old.t3ThreadId == nil)
+    }
+
     @Test func sessionStartCreatesAnIdleSession() throws {
         let state = try #require(run([event(.sessionStart, title: "Fix login")]))
         #expect(state.status == .idle)

@@ -23,5 +23,7 @@ public enum SessionActivity: String, Codable, Sendable, CaseIterable {
 /// Where the session runs, which decides what a click opens.
 public enum SessionHost: String, Codable, Sendable {
     case vscode
+    /// T3 Code (`CLAUDE_CODE_ENTRYPOINT=t3-code`): a click opens the session's T3 thread.
+    case t3
     case terminal
 }

@@ -18,6 +18,16 @@ struct SessionMergeTests {
         return state
     }
 
+    @Test func theRegistryCorrectsAStaleT3Host() throws {
+        var stale = hook("s-1", pid: 10)
+        stale.host = .terminal
+        let merged = SessionMerge.merge(hooks: [stale], processes: [process(10, "s-1", entrypoint: "t3-code")])
+        #expect(try #require(merged.first).host == .t3)
+        // Other hosts stay as the hook wrote them.
+        let vscode = SessionMerge.merge(hooks: [hook("s-2", pid: 11)], processes: [process(11, "s-2", entrypoint: "cli")])
+        #expect(try #require(vscode.first).host == .vscode)
+    }
+
     @Test func aHookSessionTakesItsFolderAndStartFromTheRegistry() throws {
         var drifted = hook("s-1", pid: 10, cwd: "/Users/demo/other-repo", status: .needsApproval)
         drifted.tool = "Bash"

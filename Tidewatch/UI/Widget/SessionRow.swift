@@ -44,9 +44,9 @@ struct SessionRow: View {
                 Text(DisplayRules.elapsed(since: session.state.statusSince, now: now))
                     .font(GlassFont.rowValue)
                     .foregroundStyle(GlassColor.textTertiary)
-                Image(systemName: session.state.host == .vscode ? "chevron.left.forwardslash.chevron.right" : "terminal")
+                Image(systemName: hostSymbol)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(session.state.host == .vscode ? AnyShapeStyle(GlassColor.vscode) : GlassColor.textSecondary)
+                    .foregroundStyle(hostStyle)
                     .frame(width: 18)
             }
             .padding(.horizontal, 10)
@@ -64,5 +64,21 @@ struct SessionRow: View {
             WidgetMenu(actions: actions)
         }
         .accessibilityLabel([session.name, statusLine, project].compactMap { $0 }.joined(separator: ", "))
+    }
+
+    private var hostSymbol: String {
+        switch session.state.host {
+        case .vscode: "chevron.left.forwardslash.chevron.right"
+        case .t3: "bubble.left.and.text.bubble.right"
+        case .terminal: "terminal"
+        }
+    }
+
+    private var hostStyle: AnyShapeStyle {
+        switch session.state.host {
+        case .vscode: AnyShapeStyle(GlassColor.vscode)
+        case .t3: AnyShapeStyle(GlassColor.t3)
+        case .terminal: AnyShapeStyle(GlassColor.textSecondary)
+        }
     }
 }

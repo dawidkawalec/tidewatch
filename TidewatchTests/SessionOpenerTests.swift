@@ -31,6 +31,17 @@ struct SessionOpenerTests {
         #expect(SessionOpener.action(for: state(host: .terminal, terminal: nil), vscodeInstalled: true) == .finder)
     }
 
+    @Test func opensT3SessionsInT3() {
+        var t3 = state(host: .t3, terminal: nil)
+        t3.t3ThreadId = "thread-1"
+        let thread = URL(string: "t3code://threads/env-1/thread-1")!
+        #expect(SessionOpener.action(for: t3, vscodeInstalled: true, t3Installed: true, t3EnvironmentId: "env-1") == .t3Thread(thread))
+        // No environment id or no thread (a file from before 0.5.0): the project in T3.
+        #expect(SessionOpener.action(for: t3, vscodeInstalled: true, t3Installed: true, t3EnvironmentId: nil) == .t3Project)
+        #expect(SessionOpener.action(for: state(host: .t3, terminal: nil), vscodeInstalled: true, t3Installed: true, t3EnvironmentId: "env-1") == .t3Project)
+        #expect(SessionOpener.action(for: t3, vscodeInstalled: true, t3Installed: false, t3EnvironmentId: "env-1") == .finder)
+    }
+
     @Test func waitsBeforeTheSessionURL() {
         #expect(SessionOpener.uriDelay == .milliseconds(400))
         #expect(SessionOpener.vscodeBundleId == "com.microsoft.VSCode")
