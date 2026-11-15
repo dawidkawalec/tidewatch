@@ -6,6 +6,15 @@
     <description>Tidewatch updates</description>
     <language>en</language>
     <item>
+      <title>Tidewatch 0.5.0</title>
+      <pubDate>Sun, 15 Nov 2026 02:34:22 +0100</pubDate>
+      <sparkle:version>23</sparkle:version>
+      <sparkle:shortVersionString>0.5.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.4</sparkle:minimumSystemVersion>
+      <sparkle:releaseNotesLink>https://kawalec.pl/tidewatch/updates/notes/0.5.0.html</sparkle:releaseNotesLink>
+      <enclosure url="https://kawalec.pl/tidewatch/download/Tidewatch-0.5.0.dmg" length="2291776" type="application/octet-stream" sparkle:edSignature="dYtCYWHvOc7aLIQSC0QU0UXflPpR4791+zT68mKpgyfMDK7D5J4CTBP5o2IQ2YYvM6CZ2zHFnpbykZXd0kRuAw==" />
+    </item>
+    <item>
       <title>Tidewatch 0.4.4</title>
       <pubDate>Fri, 16 Oct 2026 03:05:46 +0200</pubDate>
       <sparkle:version>20</sparkle:version>

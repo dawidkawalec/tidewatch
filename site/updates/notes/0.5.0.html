@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tidewatch 0.5.0</title>
+<link rel="stylesheet" href="../../assets/site.css">
+<style>
+body{background:var(--bg);padding:0 20px}
+.notes{max-width:640px;margin:0 auto;padding:28px 0 40px}
+.notes h1{font-size:clamp(28px,4.4vw,40px);line-height:1.08;letter-spacing:-.03em}
+.notes h2{margin-top:28px;font-size:21px}
+.notes h3{margin-top:20px;font-size:17px}
+.notes p{margin-top:12px;color:var(--fg-2)}
+.notes ul{margin-top:10px;padding-left:22px;list-style:disc;display:grid;gap:6px;color:var(--fg-2)}
+.notes a{text-decoration:underline;text-underline-offset:3px}
+</style>
+</head>
+<body>
+<main class="notes">
+<h1>Tidewatch 0.5.0</h1>
+<h2>New in this release</h2>
+<ul>
+<li><strong>T3 Code support.</strong> Sessions running in T3 Code get their own lamp with a T3 glyph. A click opens that exact thread in T3 Code. When the thread is not known yet (a session started before the update), the click opens the project in T3 Code instead of Finder.</li>
+<li><strong>T3 sessions grouped by project.</strong> All T3 Code sessions run under one T3 server, so they are grouped by project folder, the same way T3 Code's sidebar shows them.</li>
+<li><strong>Steadier host detection.</strong> A session that was idle while Tidewatch updated is recognised from Claude Code's own session list, so its lamp and its click are right before its next event.</li>
+</ul>
+<p>VS Code and terminal sessions work as before.</p>
+</main>
+</body>
+</html>
